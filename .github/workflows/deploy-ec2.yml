@@ -74,6 +74,7 @@ jobs:
               -p 5000:8080 \
               -e ASPNETCORE_ENVIRONMENT=Production \
               -e ASPNETCORE_URLS=http://+:8080 \
+              -e AllowedCorsOrigins__0=${{ secrets.FRONTEND_URL }} \
               ${{ env.IMAGE_NAME }}:latest
 
             # Clean up tar file and dangling images

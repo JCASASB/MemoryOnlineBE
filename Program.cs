@@ -5,15 +5,21 @@ var builder = WebApplication.CreateBuilder(args);
 // SignalR
 builder.Services.AddSignalR();
 
-// CORS - permitir el frontend de Vite
+// CORS - permitir el frontend
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:5173",  // Vite dev server
-                "http://localhost:4173"   // Vite preview
-            )
+        var allowedOrigins = builder.Configuration.GetSection("AllowedCorsOrigins").Get<string[]>()
+            ?? Array.Empty<string>();
+
+        var defaultOrigins = new[]
+        {
+            "http://localhost:5173",  // Vite dev server
+            "http://localhost:4173"   // Vite preview
+        };
+
+        policy.WithOrigins(defaultOrigins.Concat(allowedOrigins).ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // Requerido por SignalR
