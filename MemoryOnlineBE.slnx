@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/01.Apis/">
+    <Project Path="src/01.Apis/MemoryOnline.Apis.Signalr/MemoryOnline.Apis.Signalr.csproj" />
+    <Project Path="src/01.Apis/MemoryOnline.Apis.Utils/MemoryOnline.Apis.Utils.csproj" Id="778d8f74-884b-4f1d-a606-4fa62ed8ca74" />
+    <Project Path="src/01.Apis/MemoryOnline.Apis.WebApi/MemoryOnline.Apis.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/02.Domain/">
+    <Project Path="src/02.Domain/MemoryOnline.Domain.Domain/MemoryOnline.Domain.Domain.csproj" />
+    <Project Path="src/02.Domain/MemoryOnline.Domain.Entities/MemoryOnline.Domain.Entities.csproj" />
+  </Folder>
+  <Folder Name="/src/03.Application/">
+    <Project Path="src/03.Application/MemoryOnline.Application.Application/MemoryOnline.Application.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/04.Repository/">
+    <Project Path="src/04.Repository/MemoryOnline.Repository.IRepository/MemoryOnline.Repository.IRepository.csproj" Id="807d6b35-1820-4c83-8cf5-ff52f2615e16" />
+    <Project Path="src/04.Repository/MemoryOnline.Repository.Repository/MemoryOnline.Repository.Repository.csproj" />
+  </Folder>
+  <Folder Name="/src/05.Common/">
+    <Project Path="src/05.Common/MemoryOnline.Common.IOC/MemoryOnline.Common.IOC.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

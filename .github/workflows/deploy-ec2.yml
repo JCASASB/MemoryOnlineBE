@@ -1,0 +1,112 @@
+  name: Deploy to AWS EC2
+
+  on:
+    push:
+      branches: [main]
+    workflow_dispatch:
+
+  env:
+    IMAGE_NAME: memoryonline-signalr
+    CONTAINER_NAME: memoryonline-signalr
+    # Usamos el dominio de DuckDNS para conectar siempre a la IP correcta
+    EC2_PUBLIC_IP: "${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
+
+  jobs:
+    build-and-deploy:
+      runs-on: ubuntu-latest
+      environment: production
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v3
+
+        - name: Set up QEMU for ARM emulation
+          uses: docker/setup-qemu-action@v3
+
+        - name: Build Docker image for ARM64
+          run: |
+            docker buildx build --platform linux/arm64 -t ${{ env.IMAGE_NAME }}:latest -f src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile --load .
+
+        - name: Save Docker image as tar
+          run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+
+        - name: Copy image to EC2
+          uses: appleboy/scp-action@v0.1.7
+          with:
+            host: ${{ env.EC2_PUBLIC_IP }}
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_SSH_KEY }}
+            source: "image.tar.gz"
+            target: "/home/${{ secrets.EC2_USER }}"
+
+        - name: Install Docker, DuckDNS and Deploy on EC2
+          uses: appleboy/ssh-action@v1.0.3
+          with:
+            host: ${{ env.EC2_PUBLIC_IP }}
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_SSH_KEY }}
+            command_timeout: 10m
+            script: |
+              # 1. Configuración de DuckDNS (Persistencia de IP)
+              mkdir -p ~/duckdns
+              echo "echo url=\"https://www.duckdns.org{{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=\" | curl -k -o /home/${{ secrets.EC2_USER }}/duckdns/duck.log -K -" > ~/duckdns/duck.sh
+              chmod 700 ~/duckdns/duck.sh
+              # Añadir a cron si no existe para que actualice la IP cada 5 min
+              (crontab -l 2>/dev/null | grep -q "duck.sh") || (crontab -l 2>/dev/null; echo "*/5 * * * * /home/${{ secrets.EC2_USER }}/duckdns/duck.sh >/dev/null 2>&1") | crontab -
+              # Ejecutar ahora para asegurar que la IP está al día
+              ~/duckdns/duck.sh
+
+              # 2. Instalar Docker si no existe
+              if ! command -v docker &> /dev/null; then
+                sudo yum update -y || sudo apt-get update -y
+                sudo yum install -y docker || sudo apt-get install -y docker.io
+                sudo systemctl start docker
+                sudo systemctl enable docker
+                sudo usermod -aG docker $USER
+              fi
+
+              # 3. Gestionar Certificado SSL (.pfx) usando el DOMINIO
+              CERT_DIR="/home/${{ secrets.EC2_USER }}/certs"
+              PFX_PATH="$CERT_DIR/aspnetapp.pfx"
+              PFX_PASSWORD="cryptopass"
+              mkdir -p $CERT_DIR
+
+              if [ ! -f "$PFX_PATH" ]; then
+                echo "Generando certificado para ${{ env.EC2_PUBLIC_IP }}..."
+                openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+                  -keyout "$CERT_DIR/temp.key" \
+                  -out "$CERT_DIR/temp.crt" \
+                  -subj "/C=ES/ST=State/L=City/O=App/CN=${{ env.EC2_PUBLIC_IP }}"
+              
+                openssl pkcs12 -export -out "$PFX_PATH" \
+                  -inkey "$CERT_DIR/temp.key" \
+                  -in "$CERT_DIR/temp.crt" \
+                  -password pass:$PFX_PASSWORD
+              
+                rm "$CERT_DIR/temp.key" "$CERT_DIR/temp.crt"
+                chmod 644 "$PFX_PATH"
+              fi
+
+              # 4. Cargar imagen y limpiar previos
+              sudo docker load -i /home/${{ secrets.EC2_USER }}/image.tar.gz
+              sudo docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+              sudo docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+
+              # 5. Ejecutar contenedor
+              sudo docker run -d \
+                --name ${{ env.CONTAINER_NAME }} \
+                --restart unless-stopped \
+                -p 5000:8081 \
+                -v "$PFX_PATH":/https/aspnetapp.pfx:ro \
+                -e ASPNETCORE_ENVIRONMENT=Production \
+                -e ASPNETCORE_URLS="https://+:8081;http://+:8080" \
+                -e ASPNETCORE_Kestrel__Certificates__Default__Password="$PFX_PASSWORD" \
+                -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx \
+                ${{ env.IMAGE_NAME }}:latest
+
+              # 6. Limpieza
+              rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
+              sudo docker image prune -f
