@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MemoryOnline.Domain.Entities
+﻿
+namespace MemoryOnline.Domain.Entities.Game
 {
     public class Player
     {

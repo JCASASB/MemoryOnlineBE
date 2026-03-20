@@ -1,10 +1,9 @@
 ﻿using MediatR;
-using MemoryOnline.Domain.Entities;
 using MemoryOnline.Repository.IRepository;
 
 namespace MemoryOnline.Application.Application.Commands.UpdateGameState
 {
-    public class UpdateGameStateHandler : IRequestHandler<UpdateGameStateCommand, GameState>
+    public class UpdateGameStateHandler : IRequestHandler<UpdateGameStateCommand>
     {
         private readonly IRepositoryGame _gameRepository;
 
@@ -13,7 +12,7 @@ namespace MemoryOnline.Application.Application.Commands.UpdateGameState
             _gameRepository = gameRepository;
         }
 
-        public Task<GameState> Handle(UpdateGameStateCommand request, CancellationToken cancellationToken)
+        public async Task Handle(UpdateGameStateCommand request, CancellationToken cancellationToken)
         {
             var board = _gameRepository.GetGameByName(request.gameState.Name);
             if (board == null)
@@ -24,7 +23,8 @@ namespace MemoryOnline.Application.Application.Commands.UpdateGameState
             {
                 _gameRepository.UpdateGame(request.gameState);
             }
-            return Task.FromResult(request.gameState);
+
+            await Task.CompletedTask;
         }
     }
 }

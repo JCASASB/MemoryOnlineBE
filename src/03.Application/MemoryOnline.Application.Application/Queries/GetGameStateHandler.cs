@@ -1,8 +1,6 @@
 using MediatR;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Repository.IRepository;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MemoryOnline.Application.Application.Queries
 {

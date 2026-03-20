@@ -1,17 +1,21 @@
 ﻿using MediatR;
-using MemoryOnline.Domain.Domain.UseCases;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Domain.GameUseCases;
+using MemoryOnline.Domain.Domain.IGameUseCases;
+using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Repository.IRepository;
 
 namespace MemoryOnline.Application.Application.Commands.JoinGame
 {
     public class JoinGameHandler : IRequestHandler<JoinGameCommand, GameState>
     {
-        private readonly JoinGameUseCase _joinGameUseCase = new();
+        private readonly IJoinGameUseCase _joinGameUseCase;
         private readonly IRepositoryGame _gameRepository;
 
-        public JoinGameHandler(IRepositoryGame gameRepository)
+        public JoinGameHandler(
+            IRepositoryGame gameRepository
+            , IJoinGameUseCase joinGameUseCase)
         {
+            _joinGameUseCase = joinGameUseCase;
             _gameRepository = gameRepository;
         }
 

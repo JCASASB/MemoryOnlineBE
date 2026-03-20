@@ -1,8 +1,9 @@
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Domain.IGameUseCases;
+using MemoryOnline.Domain.Entities.Game;
 
-namespace MemoryOnline.Domain.Domain.UseCases
+namespace MemoryOnline.Domain.Domain.GameUseCases
 {
-    public class CreateGameUseCase
+    public class CreateGameUseCase : ICreateGameUseCase
     {
         public GameState Execute(string playerName, string gameName, Guid gameId, int level)
         {
@@ -25,6 +26,5 @@ namespace MemoryOnline.Domain.Domain.UseCases
 
             return game;
         }
-
     }
 }

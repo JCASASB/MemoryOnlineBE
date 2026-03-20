@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-
-namespace MemoryOnline.Domain.Entities
+﻿
+namespace MemoryOnline.Domain.Entities.Game
 {
     public class GameState
     {

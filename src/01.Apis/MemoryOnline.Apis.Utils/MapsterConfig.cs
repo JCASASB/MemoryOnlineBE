@@ -1,8 +1,7 @@
 ﻿using Mapster;
 using MemoryOnline.Apis.Utils.DTOs.In;
 using MemoryOnline.Apis.Utils.DTOs.Out;
-using MemoryOnline.Domain.Domain;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Entities.Game;
 
 namespace MemoryOnline.Apis.Utils
 {

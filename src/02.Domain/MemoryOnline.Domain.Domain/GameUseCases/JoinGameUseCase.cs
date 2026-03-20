@@ -1,9 +1,9 @@
-using System;
-using MemoryOnline.Domain.Entities;
 
-namespace MemoryOnline.Domain.Domain.UseCases
+using MemoryOnline.Domain.Entities.Game;
+
+namespace MemoryOnline.Domain.Domain.GameUseCases
 {
-    public class JoinGameUseCase
+    public class JoinGameUseCase : IJoinGameUseCase
     {
         public GameState Execute(GameState game, string playerName)
         {
@@ -20,5 +20,6 @@ namespace MemoryOnline.Domain.Domain.UseCases
 
             return game;
         }
+
     }
 }

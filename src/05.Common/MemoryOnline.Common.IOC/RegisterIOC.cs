@@ -1,7 +1,9 @@
 ﻿
 
-using Microsoft.Extensions.DependencyInjection;
+using MemoryOnline.Domain.Domain.GameUseCases;
+using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Repository.Repository;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MemoryOnline.Common.IOC
 {
@@ -11,6 +13,10 @@ namespace MemoryOnline.Common.IOC
         {
             // Repositorio y contexto EF Core InMemory
             services.AddGameRepositoryInMemory();
+
+            services.AddScoped<IJoinGameUseCase, JoinGameUseCase>();
+            services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
+            services.AddScoped<IUpdateStateUseCase, UpdateStateUseCase>();
             // Capa de aplicación
             return services;
         }

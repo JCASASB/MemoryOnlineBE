@@ -1,11 +1,12 @@
 ﻿
-using MemoryOnline.Domain.Entities;
+
+using MemoryOnline.Domain.Entities.Game;
 
 namespace MemoryOnline.Repository.IRepository
 {
     public interface IRepositoryGame
     {
-        GameState AddGame(GameState game);
+        void AddGame(GameState game);
         GameState? GetGame(Guid id);
         GameState? GetGameByName(string gameName);
         List<GameState> GetAllGames();
