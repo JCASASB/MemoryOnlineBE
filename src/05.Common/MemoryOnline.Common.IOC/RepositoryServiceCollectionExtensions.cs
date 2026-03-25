@@ -1,4 +1,4 @@
-using MemoryOnline.Repository.IRepository;
+using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,8 +10,10 @@ namespace MemoryOnline.Repository.Repository
         {
             services.AddDbContext<GameDbContext>(options =>
                 options.UseInMemoryDatabase(dbName));
-            services.AddScoped<IRepositoryGame, GameRepository>();
+            services.AddScoped<IGameRepository, GameRepository>();
             return services;
         }
+
+
     }
 }

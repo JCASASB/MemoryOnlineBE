@@ -1,3 +1,4 @@
+using MemoryOnline.Domain.Entities;
 using MemoryOnline.Domain.Entities.Game;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace MemoryOnline.Repository.Repository
         public DbSet<GameState> Games { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Card> Cards { get; set; }
+        public DbSet<Usuario> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +26,9 @@ namespace MemoryOnline.Repository.Repository
                 .HasMany(g => g.Cards)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Usuario>().HasKey(u => u.Id);
+
         }
     }
 }

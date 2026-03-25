@@ -1,14 +1,27 @@
+using Hispalance.Presentation.Extensions.AutoriAuthori;
+using Hispalance.Presentation.Extensions.OpenApiScalarExt;
+using MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUsers;
 using MemoryOnline.Common.IOC;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddGenericDIConfiguration();
 builder.Services.AddDependencyInjectionForApplication();
 
-
 builder.Services.AddControllersWithViews(); // Suport per a MVC o API
-builder.Services.AddEndpointsApiExplorer(); // Necessari per a Swagger
-builder.Services.AddSwaggerGen();           // Genera documentació API
+
+//From My Extensions
+builder.Services.AddOpenApiScalarForServices();
+
+//Add My Extensions for auth aut
+builder.Services.AddAuthoriAuthoriForServices(builder.Configuration);
+
+// Registrar MediatR y handlers
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<GetAllUsersHandler>();
+});
 
 
 var app = builder.Build();
@@ -17,17 +30,18 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MemoryOnline API V1");
-        options.RoutePrefix = string.Empty; // Swagger at app root
-    });
+   
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+//From My Extensions
+app.AddOpenApiScalarForApplication();
+
+//From My Extensions for auth aut
+app.AddAuthoriAuthoriForApplication();
 
 app.MapControllers();
 

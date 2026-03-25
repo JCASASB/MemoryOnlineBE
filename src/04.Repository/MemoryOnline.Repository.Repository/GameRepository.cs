@@ -1,10 +1,10 @@
 using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Repository.IRepository;
+using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemoryOnline.Repository.Repository
 {
-    public class GameRepository : IRepositoryGame
+    public class GameRepository : IGameRepository
     {
         private readonly GameDbContext _context;
 

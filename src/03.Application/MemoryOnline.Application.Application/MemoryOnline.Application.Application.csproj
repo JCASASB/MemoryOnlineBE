@@ -13,7 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
     <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
-    <ProjectReference Include="..\..\04.Repository\MemoryOnline.Repository.Repository\MemoryOnline.Repository.Repository.csproj" />
+    <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Generic\MemoryOnline.Infraestructure.Generic.csproj" />
   </ItemGroup>
 
 </Project>
