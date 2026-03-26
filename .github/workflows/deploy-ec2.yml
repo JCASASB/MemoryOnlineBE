@@ -52,48 +52,74 @@
             script: |
               # 1. Configuración de DuckDNS (Persistencia de IP)
               mkdir -p ~/duckdns
-              echo "echo url=\"https://www.duckdns.org{{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=\" | curl -k -o /home/${{ secrets.EC2_USER }}/duckdns/duck.log -K -" > ~/duckdns/duck.sh
+              DUCKDNS_DOMAIN=${{ secrets.DUCKDNS_DOMAIN }}
+              DUCKDNS_TOKEN=${{ secrets.DUCKDNS_TOKEN }}
+              EC2_USER=${{ secrets.EC2_USER }}
+
+              echo "echo url=\"https://www.duckdns.org/$DUCKDNS_DOMAIN/update?token=$DUCKDNS_TOKEN&ip=\" | curl -k -o /home/$EC2_USER/duckdns/duck.log -K -" > ~/duckdns/duck.sh
               chmod 700 ~/duckdns/duck.sh
-              (crontab -l 2>/dev/null | grep -q "duck.sh") || (crontab -l 2>/dev/null; echo "*/5 * * * * /home/${{ secrets.EC2_USER }}/duckdns/duck.sh >/dev/null 2>&1") | crontab -
               ~/duckdns/duck.sh
 
-              # 2. Instalar Docker si no existe
+              # 2. Detectar tipo de SO y configurar instalador
+              if [ -f /etc/os-release ]; then
+                  . /etc/os-release
+                  OS=$ID
+              else
+                  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+              fi
+
+              echo "Detected OS: $OS"
+
+              # 3. Instalar Docker si no existe
               if ! command -v docker &> /dev/null; then
-                sudo apt-get update -y
-                sudo apt-get install -y docker.io
-                sudo systemctl start docker
-                sudo systemctl enable docker
-                sudo usermod -aG docker $USER
+                  echo "Instalando Docker..."
+                  if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+                      sudo apt-get update -y
+                      sudo apt-get install -y docker.io
+                  elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
+                      sudo yum update -y
+                      sudo yum install -y docker
+                  fi
+                  sudo systemctl start docker
+                  sudo systemctl enable docker
+                  sudo usermod -aG docker $USER
               fi
 
-              # 3. Instalar Nginx y Certbot
-              sudo apt-get install -y nginx certbot python3-certbot-nginx
+              # 4. Instalar Nginx y Certbot
+              echo "Instalando Nginx y Certbot..."
+              if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+                  sudo apt-get install -y nginx certbot python3-certbot-nginx
+              elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
+                  sudo yum install -y nginx certbot python3-certbot-nginx
+              fi
 
-              # 4. Generar certificado SSL con Let's Encrypt
-              DOMAIN="${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
+              # 5. Generar certificado SSL con Let's Encrypt
+              DOMAIN="${DUCKDNS_DOMAIN}.duckdns.org"
+              CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }}
+
               if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-                echo "Generando certificado SSL para $DOMAIN..."
-                sudo certbot certonly --nginx -d "$DOMAIN" \
-                  --email "${{ secrets.CERTBOT_EMAIL }}" \
-                  --agree-tos \
-                  --non-interactive \
-                  --keep-until-expiring
+                  echo "Generando certificado SSL para $DOMAIN..."
+                  sudo certbot certonly --nginx -d "$DOMAIN" \
+                    --email "$CERTBOT_EMAIL" \
+                    --agree-tos \
+                    --non-interactive \
+                    --keep-until-expiring
               fi
 
-              # 5. Configurar Nginx como Reverse Proxy
-              sudo tee /etc/nginx/sites-available/default > /dev/null << NGINX
+              # 6. Configurar Nginx como Reverse Proxy
+              sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
               server {
                   listen 80;
-                  server_name ${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org;
+                  server_name $DOMAIN;
                   return 301 https://\$server_name\$request_uri;
               }
 
               server {
                   listen 443 ssl http2;
-                  server_name ${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org;
+                  server_name $DOMAIN;
 
-                  ssl_certificate /etc/letsencrypt/live/${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org/fullchain.pem;
-                  ssl_certificate_key /etc/letsencrypt/live/${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org/privkey.pem;
+                  ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+                  ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
                   ssl_protocols TLSv1.2 TLSv1.3;
                   ssl_ciphers HIGH:!aNULL:!MD5;
                   ssl_prefer_server_ciphers on;
@@ -115,22 +141,21 @@
               }
               NGINX
 
-              # 6. Validar y reiniciar Nginx
+              # 7. Validar y reiniciar Nginx
               sudo nginx -t
-              sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default || true
               sudo systemctl enable nginx
               sudo systemctl restart nginx
 
-              # 7. Configurar auto-renewal de certificados
+              # 8. Configurar auto-renewal de certificados
               sudo systemctl enable certbot.timer
               sudo systemctl start certbot.timer
 
-              # 8. Cargar imagen Docker y limpiar previos
+              # 9. Cargar imagen Docker y limpiar previos
               sudo docker load -i /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
               sudo docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
 
-              # 9. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
+              # 10. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
               sudo docker run -d \
                 --name ${{ env.CONTAINER_NAME }} \
                 --restart unless-stopped \
@@ -139,35 +164,31 @@
                 -e ASPNETCORE_URLS="http://+:8080" \
                 ${{ env.IMAGE_NAME }}:latest
 
-              # 10. Limpieza
+              # 11. Limpieza
               rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker image prune -f
 
-              # 11. Diagnóstico (para debugging)
+              # 12. Diagnóstico (para debugging)
               echo "========== DIAGNÓSTICO =========="
+              echo "=== SO Detectado ==="
+              if [ -f /etc/os-release ]; then . /etc/os-release; echo "OS: $ID $VERSION"; fi
+
+              echo ""
               echo "=== Estado de Nginx ==="
-              sudo systemctl status nginx --no-pager || true
+              sudo systemctl status nginx --no-pager 2>&1 | head -10 || echo "Nginx no está disponible"
 
               echo ""
               echo "=== Estado del contenedor Docker ==="
-              sudo docker ps -a | grep ${{ env.CONTAINER_NAME }} || true
+              sudo docker ps -a | grep ${{ env.CONTAINER_NAME }} || echo "Contenedor no encontrado"
 
               echo ""
               echo "=== Certificados instalados ==="
-              sudo certbot certificates || true
-
-              echo ""
-              echo "=== Logs de Nginx (últimas 30 líneas) ==="
-              sudo tail -30 /var/log/nginx/error.log || true
-
-              echo ""
-              echo "=== Logs de Certbot ==="
-              sudo tail -20 /var/log/letsencrypt/letsencrypt.log || true
+              sudo certbot certificates 2>&1 || echo "Certbot no disponible"
 
               echo ""
               echo "=== Prueba de conectividad al localhost:5000 ==="
-              curl -v http://localhost:5000 2>&1 | head -20 || true
+              curl -s http://localhost:5000 | head -5 || echo "No se pudo conectar"
 
               echo ""
-              echo "=== Configuración de Nginx ==="
-              sudo cat /etc/nginx/sites-available/default | head -50 || true
+              echo "=== Verificar puertos abiertos ==="
+              sudo netstat -tulpn 2>/dev/null | grep LISTEN || echo "netstat no disponible"
