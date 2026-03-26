@@ -117,6 +117,7 @@
 
               # 6. Validar y reiniciar Nginx
               sudo nginx -t
+              sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default || true
               sudo systemctl enable nginx
               sudo systemctl restart nginx
 
@@ -141,3 +142,32 @@
               # 10. Limpieza
               rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker image prune -f
+
+              # 11. Diagnóstico (para debugging)
+              echo "========== DIAGNÓSTICO =========="
+              echo "=== Estado de Nginx ==="
+              sudo systemctl status nginx --no-pager || true
+
+              echo ""
+              echo "=== Estado del contenedor Docker ==="
+              sudo docker ps -a | grep ${{ env.CONTAINER_NAME }} || true
+
+              echo ""
+              echo "=== Certificados instalados ==="
+              sudo certbot certificates || true
+
+              echo ""
+              echo "=== Logs de Nginx (últimas 30 líneas) ==="
+              sudo tail -30 /var/log/nginx/error.log || true
+
+              echo ""
+              echo "=== Logs de Certbot ==="
+              sudo tail -20 /var/log/letsencrypt/letsencrypt.log || true
+
+              echo ""
+              echo "=== Prueba de conectividad al localhost:5000 ==="
+              curl -v http://localhost:5000 2>&1 | head -20 || true
+
+              echo ""
+              echo "=== Configuración de Nginx ==="
+              sudo cat /etc/nginx/sites-available/default | head -50 || true
