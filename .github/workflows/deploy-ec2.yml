@@ -42,7 +42,7 @@
             source: "image.tar.gz"
             target: "/home/${{ secrets.EC2_USER }}"
 
-        - name: Install Docker, DuckDNS and Deploy on EC2
+        - name: Install Docker, DuckDNS, Nginx, Certbot and Deploy on EC2
           uses: appleboy/ssh-action@v1.0.3
           with:
             host: ${{ env.EC2_PUBLIC_IP }}
@@ -54,59 +54,90 @@
               mkdir -p ~/duckdns
               echo "echo url=\"https://www.duckdns.org{{ secrets.DUCKDNS_DOMAIN }}&token=${{ secrets.DUCKDNS_TOKEN }}&ip=\" | curl -k -o /home/${{ secrets.EC2_USER }}/duckdns/duck.log -K -" > ~/duckdns/duck.sh
               chmod 700 ~/duckdns/duck.sh
-              # Añadir a cron si no existe para que actualice la IP cada 5 min
               (crontab -l 2>/dev/null | grep -q "duck.sh") || (crontab -l 2>/dev/null; echo "*/5 * * * * /home/${{ secrets.EC2_USER }}/duckdns/duck.sh >/dev/null 2>&1") | crontab -
-              # Ejecutar ahora para asegurar que la IP está al día
               ~/duckdns/duck.sh
 
               # 2. Instalar Docker si no existe
               if ! command -v docker &> /dev/null; then
-                sudo yum update -y || sudo apt-get update -y
-                sudo yum install -y docker || sudo apt-get install -y docker.io
+                sudo apt-get update -y
+                sudo apt-get install -y docker.io
                 sudo systemctl start docker
                 sudo systemctl enable docker
                 sudo usermod -aG docker $USER
               fi
 
-              # 3. Gestionar Certificado SSL (.pfx) usando el DOMINIO
-              CERT_DIR="/home/${{ secrets.EC2_USER }}/certs"
-              PFX_PATH="$CERT_DIR/aspnetapp.pfx"
-              PFX_PASSWORD="cryptopass"
-              mkdir -p $CERT_DIR
+              # 3. Instalar Nginx y Certbot
+              sudo apt-get install -y nginx certbot python3-certbot-nginx
 
-              if [ ! -f "$PFX_PATH" ]; then
-                echo "Generando certificado para ${{ env.EC2_PUBLIC_IP }}..."
-                openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-                  -keyout "$CERT_DIR/temp.key" \
-                  -out "$CERT_DIR/temp.crt" \
-                  -subj "/C=ES/ST=State/L=City/O=App/CN=${{ env.EC2_PUBLIC_IP }}"
-              
-                openssl pkcs12 -export -out "$PFX_PATH" \
-                  -inkey "$CERT_DIR/temp.key" \
-                  -in "$CERT_DIR/temp.crt" \
-                  -password pass:$PFX_PASSWORD
-              
-                rm "$CERT_DIR/temp.key" "$CERT_DIR/temp.crt"
-                chmod 644 "$PFX_PATH"
+              # 4. Generar certificado SSL con Let's Encrypt
+              DOMAIN="${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
+              if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+                echo "Generando certificado SSL para $DOMAIN..."
+                sudo certbot certonly --nginx -d "$DOMAIN" \
+                  --email "${{ secrets.CERTBOT_EMAIL }}" \
+                  --agree-tos \
+                  --non-interactive \
+                  --keep-until-expiring
               fi
 
-              # 4. Cargar imagen y limpiar previos
+              # 5. Configurar Nginx como Reverse Proxy
+              sudo tee /etc/nginx/sites-available/default > /dev/null << NGINX
+              server {
+                  listen 80;
+                  server_name ${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org;
+                  return 301 https://\$server_name\$request_uri;
+              }
+
+              server {
+                  listen 443 ssl http2;
+                  server_name ${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org;
+
+                  ssl_certificate /etc/letsencrypt/live/${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org/fullchain.pem;
+                  ssl_certificate_key /etc/letsencrypt/live/${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org/privkey.pem;
+                  ssl_protocols TLSv1.2 TLSv1.3;
+                  ssl_ciphers HIGH:!aNULL:!MD5;
+                  ssl_prefer_server_ciphers on;
+
+                  access_log /var/log/nginx/access.log;
+                  error_log /var/log/nginx/error.log;
+
+                  location / {
+                      proxy_pass http://localhost:5000;
+                      proxy_http_version 1.1;
+                      proxy_set_header Upgrade \$http_upgrade;
+                      proxy_set_header Connection keep-alive;
+                      proxy_set_header Host \$host;
+                      proxy_set_header X-Real-IP \$remote_addr;
+                      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto \$scheme;
+                      proxy_cache_bypass \$http_upgrade;
+                  }
+              }
+              NGINX
+
+              # 6. Validar y reiniciar Nginx
+              sudo nginx -t
+              sudo systemctl enable nginx
+              sudo systemctl restart nginx
+
+              # 7. Configurar auto-renewal de certificados
+              sudo systemctl enable certbot.timer
+              sudo systemctl start certbot.timer
+
+              # 8. Cargar imagen Docker y limpiar previos
               sudo docker load -i /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
               sudo docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
 
-              # 5. Ejecutar contenedor
+              # 9. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
               sudo docker run -d \
                 --name ${{ env.CONTAINER_NAME }} \
                 --restart unless-stopped \
-                -p 5000:8081 \
-                -v "$PFX_PATH":/https/aspnetapp.pfx:ro \
+                -p 5000:8080 \
                 -e ASPNETCORE_ENVIRONMENT=Production \
-                -e ASPNETCORE_URLS="https://+:8081;http://+:8080" \
-                -e ASPNETCORE_Kestrel__Certificates__Default__Password="$PFX_PASSWORD" \
-                -e ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx \
+                -e ASPNETCORE_URLS="http://+:8080" \
                 ${{ env.IMAGE_NAME }}:latest
 
-              # 6. Limpieza
+              # 10. Limpieza
               rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker image prune -f
