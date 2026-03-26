@@ -1,0 +1,24 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace MemoryOnline.Infraestructure.Generic.DBContext
+{
+    public class DBContextPostgres : DBContextMyBase, IMyDbContext
+    {
+        public DBContextPostgres(IConfiguration config) : base(config)
+        {
+            _connectionString = GetConnectionString();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
+
+            // replace with your Server Version and Type
+            options.UseNpgsql(_connectionString);
+
+            base.OnConfiguring(options);
+        }
+    }
+
+}

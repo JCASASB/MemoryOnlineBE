@@ -2,10 +2,10 @@ using MapsterMapper;
 using MediatR;
 using MemoryOnline.Apis.Utils.DTOs.In;
 using MemoryOnline.Apis.Utils.DTOs.Out;
-using MemoryOnline.Application.Application.Commands.JoinGame;
-using MemoryOnline.Application.Application.Commands.UpdateGameState;
-using MemoryOnline.Application.Application.Queries;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Application.Application.GameAppplication.Commands.JoinGame;
+using MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState;
+using MemoryOnline.Application.Application.GameAppplication.Queries;
+using MemoryOnline.Domain.Entities.Game;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 
@@ -73,9 +73,9 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             {
                 var domObj = _mapper.Map<GameState>(updatedGame);
 
-                var newGame = await _mediator.Send(new UpdateGameStateCommand(domObj));
+                await _mediator.Send(new UpdateGameStateCommand(domObj));
 
-                string clientGroupId = newGame.Id.ToString();
+                string clientGroupId = domObj.Id.ToString();
 
                 await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
@@ -93,10 +93,10 @@ namespace MemoryOnline.Apis.Signalr.Hubs
 
             var domObj = _mapper.Map<GameState>(updatedGame);
 
-            var newGame = await _mediator.Send(new UpdateGameStateCommand(domObj));
+            await _mediator.Send(new UpdateGameStateCommand(domObj));
 
-            var clientGroupId = newGame.Id.ToString();
-            await ResponseGameState(clientGroupId, newGame);    
+            var clientGroupId = domObj.Id.ToString();
+            await ResponseGameState(clientGroupId, domObj);    
         }
 
         public async Task GetGameState(string gameName)

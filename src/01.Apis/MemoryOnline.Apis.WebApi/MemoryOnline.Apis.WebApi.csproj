@@ -9,9 +9,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\03.Application\MemoryOnline.Application.Application\MemoryOnline.Application.Application.csproj" />
     <ProjectReference Include="..\..\05.Common\MemoryOnline.Common.IOC\MemoryOnline.Common.IOC.csproj" />
+    <ProjectReference Include="..\Hispalance.Presentation.Extensions\Hispalance.Presentation.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
   </ItemGroup>
 
 </Project>

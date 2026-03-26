@@ -1,10 +1,10 @@
-using MemoryOnline.Domain.Entities;
-using MemoryOnline.Repository.IRepository;
+using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemoryOnline.Repository.Repository
 {
-    public class GameRepository : IRepositoryGame
+    public class GameRepository : IGameRepository
     {
         private readonly GameDbContext _context;
 
@@ -13,11 +13,10 @@ namespace MemoryOnline.Repository.Repository
             _context = context;
         }
 
-        public GameState AddGame(GameState game)
+        public void AddGame(GameState game)
         {
             _context.Games.Add(game);
             _context.SaveChanges();
-            return game;
         }
 
 

@@ -1,10 +1,9 @@
 using MemoryOnline.Apis.Signalr;
 using MemoryOnline.Apis.Signalr.Hubs;
-using MemoryOnline.Application.Application.Commands.JoinGame;
-using MemoryOnline.Application.Application.Commands.UpdateGameState;
 using MemoryOnline.Common.IOC;
 using Microsoft.AspNetCore.SignalR;
 using MemoryOnline.Apis.Utils;
+using MemoryOnline.Application.Application.GameAppplication.Commands.JoinGame;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +36,6 @@ builder.Services.AddDependencyInjectionForApplication();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<JoinGameHandler>();
-    cfg.RegisterServicesFromAssemblyContaining<UpdateGameStateHandler>();
 });
 
 // Registrar configuración de Mapster, mapeo de dtos

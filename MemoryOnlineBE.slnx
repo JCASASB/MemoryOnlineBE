@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/01.Apis/">
+    <Project Path="src/01.Apis/Hispalance.Presentation.Extensions/Hispalance.Presentation.Extensions.csproj" Id="342f3b35-b7a0-4a36-bc70-104eb0247c00" />
     <Project Path="src/01.Apis/MemoryOnline.Apis.Signalr/MemoryOnline.Apis.Signalr.csproj" />
     <Project Path="src/01.Apis/MemoryOnline.Apis.Utils/MemoryOnline.Apis.Utils.csproj" Id="778d8f74-884b-4f1d-a606-4fa62ed8ca74" />
     <Project Path="src/01.Apis/MemoryOnline.Apis.WebApi/MemoryOnline.Apis.WebApi.csproj" />
@@ -12,8 +13,11 @@
   <Folder Name="/src/03.Application/">
     <Project Path="src/03.Application/MemoryOnline.Application.Application/MemoryOnline.Application.Application.csproj" />
   </Folder>
+  <Folder Name="/src/04.Infraestructure/">
+    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Generic/MemoryOnline.Infraestructure.Generic.csproj" />
+    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Repository/MemoryOnline.Infraestructure.IRepository.csproj" Id="fce085b7-9b5c-4690-b698-b69409988287" />
+  </Folder>
   <Folder Name="/src/04.Repository/">
-    <Project Path="src/04.Repository/MemoryOnline.Repository.IRepository/MemoryOnline.Repository.IRepository.csproj" Id="807d6b35-1820-4c83-8cf5-ff52f2615e16" />
     <Project Path="src/04.Repository/MemoryOnline.Repository.Repository/MemoryOnline.Repository.Repository.csproj" />
   </Folder>
   <Folder Name="/src/05.Common/">
