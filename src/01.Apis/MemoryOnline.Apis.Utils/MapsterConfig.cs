@@ -75,7 +75,7 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.id, src => src.Id.ToString())
                 .Map(dest => dest.value, src => src.Value.ToString())
                 .Map(dest => dest.imgUrl, src => src.ImgUrl) // <-- Revisa si en Card es 'ImgUrl' o 'Image'
-                .Map(dest => dest.isRevealed, src => src.State == CardState.FaceUp)
+                .Map(dest => dest.isRevealed, src => src.State == CardState.FaceUp || src.State == CardState.Matched)
                 .Map(dest => dest.isMatched, src => src.State == CardState.Matched);
 
             // --- MAPEO DE GAMESTATE (Dominio -> DTO Out) ---
