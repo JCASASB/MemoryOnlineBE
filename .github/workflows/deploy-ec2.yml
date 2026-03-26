@@ -55,6 +55,7 @@
               DUCKDNS_DOMAIN=${{ secrets.DUCKDNS_DOMAIN }}
               DUCKDNS_TOKEN=${{ secrets.DUCKDNS_TOKEN }}
               EC2_USER=${{ secrets.EC2_USER }}
+              DOMAIN="${DUCKDNS_DOMAIN}.duckdns.org"
 
               echo "echo url=\"https://www.duckdns.org/$DUCKDNS_DOMAIN/update?token=$DUCKDNS_TOKEN&ip=\" | curl -k -o /home/$EC2_USER/duckdns/duck.log -K -" > ~/duckdns/duck.sh
               chmod 700 ~/duckdns/duck.sh
@@ -101,23 +102,28 @@
               # 5. Configuración temporal de Nginx (sin certificados) para validación de Certbot
               sudo mkdir -p /etc/nginx/conf.d
               sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
-              server {
-                  listen 80;
-                  server_name $DOMAIN;
-                  location / {
-                      proxy_pass http://localhost:5000;
-                      proxy_http_version 1.1;
-                      proxy_set_header Host \$host;
-                  }
-              }
-              NGINX
+server {
+    listen 80;
+    server_name $DOMAIN;
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+NGINX
 
               # 5b. Iniciar Nginx
               sudo systemctl enable nginx
               sudo systemctl restart nginx
 
               # 6. Generar certificado SSL con Let's Encrypt
-              DOMAIN="${DUCKDNS_DOMAIN}.duckdns.org"
               CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }}
 
               # Validar que el email no esté vacío
@@ -125,6 +131,9 @@
                   echo "ERROR: CERTBOT_EMAIL no está configurado en los secretos de GitHub"
                   exit 1
               fi
+
+              # Detener Nginx temporalmente para que Certbot pueda usar puerto 443
+              sudo systemctl stop nginx 2>/dev/null || true
 
               if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
                   echo "Generando certificado SSL para $DOMAIN con email: $CERTBOT_EMAIL..."
@@ -139,39 +148,39 @@
               if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
                   echo "Certificado encontrado, configurando HTTPS..."
                   sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
-              server {
-                  listen 80;
-                  server_name $DOMAIN;
-                  return 301 https://\$server_name\$request_uri;
-              }
+server {
+    listen 80;
+    server_name $DOMAIN;
+    return 301 https://\$server_name\$request_uri;
+}
 
-              server {
-                  listen 443 ssl;
-                  http2 on;
-                  server_name $DOMAIN;
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name $DOMAIN;
 
-                  ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-                  ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-                  ssl_protocols TLSv1.2 TLSv1.3;
-                  ssl_ciphers HIGH:!aNULL:!MD5;
-                  ssl_prefer_server_ciphers on;
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
 
-                  access_log /var/log/nginx/access.log;
-                  error_log /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
 
-                  location / {
-                      proxy_pass http://localhost:5000;
-                      proxy_http_version 1.1;
-                      proxy_set_header Upgrade \$http_upgrade;
-                      proxy_set_header Connection keep-alive;
-                      proxy_set_header Host \$host;
-                      proxy_set_header X-Real-IP \$remote_addr;
-                      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                      proxy_set_header X-Forwarded-Proto \$scheme;
-                      proxy_cache_bypass \$http_upgrade;
-                  }
-              }
-              NGINX
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+NGINX
               else
                   echo "Certificado no encontrado, usando solo HTTP..."
               fi
