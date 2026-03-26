@@ -93,7 +93,30 @@
                   sudo yum install -y nginx certbot python3-certbot-nginx
               fi
 
-              # 5. Generar certificado SSL con Let's Encrypt
+              # 4b. Detener y deshabilitar Apache si está corriendo
+              echo "Parando Apache (httpd) si está corriendo..."
+              sudo systemctl stop httpd 2>/dev/null || true
+              sudo systemctl disable httpd 2>/dev/null || true
+
+              # 5. Configuración temporal de Nginx (sin certificados) para validación de Certbot
+              sudo mkdir -p /etc/nginx/conf.d
+              sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
+              server {
+                  listen 80;
+                  server_name $DOMAIN;
+                  location / {
+                      proxy_pass http://localhost:5000;
+                      proxy_http_version 1.1;
+                      proxy_set_header Host \$host;
+                  }
+              }
+              NGINX
+
+              # 5b. Iniciar Nginx
+              sudo systemctl enable nginx
+              sudo systemctl restart nginx
+
+              # 6. Generar certificado SSL con Let's Encrypt
               DOMAIN="${DUCKDNS_DOMAIN}.duckdns.org"
               CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }}
 
@@ -105,15 +128,17 @@
 
               if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
                   echo "Generando certificado SSL para $DOMAIN con email: $CERTBOT_EMAIL..."
-                  sudo certbot certonly --nginx -d "$DOMAIN" \
+                  sudo certbot certonly --standalone -d "$DOMAIN" \
                     --email "$CERTBOT_EMAIL" \
                     --agree-tos \
                     --non-interactive \
-                    --keep-until-expiring || echo "Advertencia: Certbot falló, continuando..."
+                    --keep-until-expiring || echo "Advertencia: Certbot falló, continuando con configuración HTTP..."
               fi
 
-              # 6. Configurar Nginx como Reverse Proxy
-              sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
+              # 7. Configurar Nginx con SSL (si el certificado existe)
+              if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+                  echo "Certificado encontrado, configurando HTTPS..."
+                  sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null << NGINX
               server {
                   listen 80;
                   server_name $DOMAIN;
@@ -125,7 +150,6 @@
                   http2 on;
                   server_name $DOMAIN;
 
-                  # Certificados SSL (solo si existen)
                   ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
                   ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
                   ssl_protocols TLSv1.2 TLSv1.3;
@@ -148,13 +172,15 @@
                   }
               }
               NGINX
+              else
+                  echo "Certificado no encontrado, usando solo HTTP..."
+              fi
 
-              # 7. Validar y reiniciar Nginx
+              # 8. Validar y reiniciar Nginx
               sudo nginx -t
-              sudo systemctl enable nginx
               sudo systemctl restart nginx
 
-              # 8. Configurar auto-renewal de certificados (Amazon Linux usa certbot-renew.timer)
+              # 9. Configurar auto-renewal de certificados (Amazon Linux usa certbot-renew.timer)
               if [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
                   sudo systemctl enable certbot-renew.timer
                   sudo systemctl start certbot-renew.timer
@@ -163,12 +189,12 @@
                   sudo systemctl start certbot.timer
               fi
 
-              # 9. Cargar imagen Docker y limpiar previos
+              # 10. Cargar imagen Docker y limpiar previos
               sudo docker load -i /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
               sudo docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
 
-              # 10. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
+              # 11. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
               sudo docker run -d \
                 --name ${{ env.CONTAINER_NAME }} \
                 --restart unless-stopped \
@@ -177,11 +203,11 @@
                 -e ASPNETCORE_URLS="http://+:8080" \
                 ${{ env.IMAGE_NAME }}:latest
 
-              # 11. Limpieza
+              # 12. Limpieza
               rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
               sudo docker image prune -f
 
-              # 12. Diagnóstico (para debugging)
+              # 13. Diagnóstico (para debugging)
               echo "========== DIAGNÓSTICO =========="
               echo "=== SO Detectado ==="
               if [ -f /etc/os-release ]; then . /etc/os-release; echo "OS: $ID $VERSION"; fi
@@ -199,9 +225,17 @@
               sudo certbot certificates 2>&1 || echo "Certbot no disponible"
 
               echo ""
+              echo "=== Verificar si tenemos HTTPS ==="
+              if [ -d "/etc/letsencrypt/live" ]; then
+                  echo "✅ HTTPS está configurado"
+              else
+                  echo "⚠️  HTTPS no está disponible aún, usando HTTP"
+              fi
+
+              echo ""
               echo "=== Prueba de conectividad al localhost:5000 ==="
               curl -s http://localhost:5000 | head -5 || echo "No se pudo conectar"
 
               echo ""
               echo "=== Verificar puertos abiertos ==="
-              sudo netstat -tulpn 2>/dev/null | grep LISTEN || echo "netstat no disponible"
+              sudo netstat -tulpn 2>/dev/null | grep LISTEN || ss -tulpn | grep LISTEN
