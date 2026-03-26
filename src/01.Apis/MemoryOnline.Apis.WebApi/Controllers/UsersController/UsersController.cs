@@ -1,6 +1,7 @@
 using MediatR;
 using MemoryOnline.Application.Application.UsersApplication.Commands.Create;
 using MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUsers;
+using MemoryOnline.Application.Application.UsersApplication.Queries.GetUser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +34,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpGet("/getbyname/{name}")]
         public async Task<IActionResult> GetUserByName(string name)
         {
-          
+            var users = _mediator.Send(new GetUserQuery(name)).Result;
             return Ok();
         }
 
