@@ -86,32 +86,74 @@ sudo systemctl restart nginx
 if [ -z "$CERTBOT_EMAIL" ]; then
     echo "⚠️  CERTBOT_EMAIL no configurado, saltando SSL..."
 else
+    echo "🔐 Procesando certificado SSL..."
+
     # Detener Nginx para que Certbot use puerto 443
+    echo "   - Deteniendo Nginx temporalmente..."
     sudo systemctl stop nginx 2>/dev/null || true
-    
+
+    # Esperar 2 segundos para que libere los puertos
+    sleep 2
+
+    # Si no existe el certificado, intentar generarlo
     if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "🔐 Generando certificado SSL para $DOMAIN..."
+        echo "   - Generando certificado SSL para $DOMAIN..."
         sudo certbot certonly --standalone -d "$DOMAIN" \
             --email "$CERTBOT_EMAIL" \
             --agree-tos \
             --non-interactive \
-            --keep-until-expiring || echo "⚠️  Certbot falló, continuando con HTTP..."
+            --keep-until-expiring || {
+            echo "⚠️  Error: Certbot falló, continuando con HTTP..."
+        }
+    else
+        echo "   - Certificado ya existe"
+    fi
+
+    # Verificar si el certificado se creó
+    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+        echo "   ✅ Certificado SSL validado"
+    else
+        echo "   ⚠️  Certificado NO disponible, usará HTTP"
     fi
 fi
 
 # ===========================================
 # 7. Configurar Nginx con SSL (si existe cert)
 # ===========================================
+echo "⚙️  Configurando Nginx con SSL..."
+
 if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-    echo "🔒 Certificado encontrado, configurando HTTPS..."
+    echo "   🔒 Certificado encontrado, aplicando configuración HTTPS..."
     sed "s/__DOMAIN__/$DOMAIN/g" /tmp/nginx-https.conf.template | sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null
+    echo "   ✅ Configuración HTTPS aplicada"
 else
-    echo "⚠️  Certificado no encontrado, usando solo HTTP..."
+    echo "   ⚠️  Certificado no encontrado, usando configuración HTTP..."
+    sed "s/__DOMAIN__/$DOMAIN/g" /tmp/nginx-http.conf.template | sudo tee /etc/nginx/conf.d/reverse-proxy.conf > /dev/null
+    echo "   ℹ️  Usará HTTP en la próxima ejecución si se obtiene certificado"
 fi
 
-# Validar y reiniciar Nginx
-sudo nginx -t
+# Validar configuración
+echo "   - Validando configuración Nginx..."
+if sudo nginx -t 2>&1 | grep "successful"; then
+    echo "   ✅ Configuración válida"
+else
+    echo "   ❌ Error en configuración Nginx"
+    sudo nginx -t
+    exit 1
+fi
+
+# Reiniciar Nginx
+echo "   - Reiniciando Nginx..."
 sudo systemctl restart nginx
+
+# Verificar que inició correctamente
+if sudo systemctl is-active --quiet nginx; then
+    echo "   ✅ Nginx reiniciado correctamente"
+else
+    echo "   ❌ Error al reiniciar Nginx"
+    sudo systemctl status nginx
+    exit 1
+fi
 
 # ===========================================
 # 8. Auto-renewal de certificados
@@ -152,37 +194,68 @@ sudo docker image prune -f
 # 11. Diagnóstico
 # ===========================================
 echo ""
-echo "========== 📊 DIAGNÓSTICO =========="
-echo "=== SO Detectado ==="
-if [ -f /etc/os-release ]; then . /etc/os-release; echo "OS: $ID $VERSION"; fi
+echo "========== 📊 DIAGNÓSTICO FINAL =========="
 
 echo ""
-echo "=== Estado de Nginx ==="
-sudo systemctl status nginx --no-pager 2>&1 | head -10 || echo "Nginx no disponible"
-
-echo ""
-echo "=== Estado del contenedor ==="
-sudo docker ps -a | grep $CONTAINER_NAME || echo "Contenedor no encontrado"
-
-echo ""
-echo "=== Certificados ==="
-sudo certbot certificates 2>&1 || echo "Certbot no disponible"
-
-echo ""
-echo "=== HTTPS Status ==="
-if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-    echo "✅ HTTPS configurado"
-else
-    echo "⚠️  Solo HTTP disponible"
+echo "✅ SO Detectado:"
+if [ -f /etc/os-release ]; then 
+    . /etc/os-release
+    echo "   OS: $ID $VERSION"
 fi
 
 echo ""
-echo "=== Conectividad ==="
-curl -s http://localhost:5000 | head -5 || echo "No se pudo conectar"
+echo "✅ Estado de Nginx:"
+if sudo systemctl is-active --quiet nginx; then
+    echo "   Status: ACTIVO ✅"
+    echo "   Escuchando en:"
+    sudo netstat -tulpn 2>/dev/null | grep nginx || sudo ss -tulpn | grep nginx
+else
+    echo "   Status: INACTIVO ❌"
+fi
 
 echo ""
-echo "=== Puertos ==="
-sudo netstat -tulpn 2>/dev/null | grep LISTEN || ss -tulpn | grep LISTEN
+echo "✅ Estado del contenedor:"
+if sudo docker ps | grep $CONTAINER_NAME > /dev/null; then
+    echo "   Status: EJECUTÁNDOSE ✅"
+    sudo docker ps | grep $CONTAINER_NAME
+else
+    echo "   Status: NO EJECUTÁNDOSE ❌"
+fi
 
 echo ""
-echo "🎉 Deploy completado!"
+echo "✅ Certificado SSL:"
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+    echo "   Status: VÁLIDO ✅"
+    sudo certbot certificates 2>/dev/null | grep -A 5 "$DOMAIN"
+else
+    echo "   Status: NO INSTALADO ⚠️"
+fi
+
+echo ""
+echo "✅ Configuración de Nginx:"
+if [ -f /etc/nginx/conf.d/reverse-proxy.conf ]; then
+    if grep -q "listen 443" /etc/nginx/conf.d/reverse-proxy.conf; then
+        echo "   Modo: HTTPS ✅"
+    elif grep -q "listen 80" /etc/nginx/conf.d/reverse-proxy.conf; then
+        echo "   Modo: HTTP ⚠️"
+    fi
+    echo "   Dominio configurado: $DOMAIN"
+else
+    echo "   Archivo de configuración no encontrado ❌"
+fi
+
+echo ""
+echo "✅ Conectividad local:"
+if curl -s http://localhost:5000 > /dev/null 2>&1; then
+    echo "   localhost:5000: RESPONDIENDO ✅"
+else
+    echo "   localhost:5000: SIN RESPUESTA ⚠️"
+fi
+
+echo ""
+echo "========== 🎉 DEPLOY COMPLETADO =========="
+echo ""
+echo "📍 Acceso externo:"
+echo "   http://hispalance.duckdns.org  (se redirige a HTTPS si está disponible)"
+echo "   https://hispalance.duckdns.org (si SSL está configurado)"
+echo ""
