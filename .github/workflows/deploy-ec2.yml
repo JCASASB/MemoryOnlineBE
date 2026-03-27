@@ -1,252 +1,70 @@
-  name: Deploy to AWS EC2
+name: Deploy to AWS EC2
 
-  on:
-    push:
-      branches: [main]
-    workflow_dispatch:
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-  env:
-    IMAGE_NAME: memoryonline-signalr
-    CONTAINER_NAME: memoryonline-signalr
-    # Usamos el dominio de DuckDNS para conectar siempre a la IP correcta
-    EC2_PUBLIC_IP: "${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
+env:
+  IMAGE_NAME: memoryonline-signalr
+  CONTAINER_NAME: memoryonline-signalr
+  EC2_PUBLIC_IP: "${{ secrets.DUCKDNS_DOMAIN }}.duckdns.org"
 
-  jobs:
-    build-and-deploy:
-      runs-on: ubuntu-latest
-      environment: production
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-        - name: Set up QEMU for ARM emulation
-          uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU for ARM emulation
+        uses: docker/setup-qemu-action@v3
 
-        - name: Build Docker image for ARM64
-          run: |
-            docker buildx build --platform linux/arm64 -t ${{ env.IMAGE_NAME }}:latest -f src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile --load .
+      - name: Build Docker image for ARM64
+        run: |
+          docker buildx build --platform linux/arm64 -t ${{ env.IMAGE_NAME }}:latest -f src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile --load .
 
-        - name: Save Docker image as tar
-          run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+      - name: Save Docker image as tar
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
 
-        - name: Copy image to EC2
-          uses: appleboy/scp-action@v0.1.7
-          with:
-            host: ${{ env.EC2_PUBLIC_IP }}
-            username: ${{ secrets.EC2_USER }}
-            key: ${{ secrets.EC2_SSH_KEY }}
-            source: "image.tar.gz"
-            target: "/home/${{ secrets.EC2_USER }}"
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.EC2_PUBLIC_IP }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "image.tar.gz,.github/scripts/*"
+          target: "/home/${{ secrets.EC2_USER }}"
 
-        - name: Install Docker, DuckDNS, Nginx, Certbot and Deploy on EC2
-          uses: appleboy/ssh-action@v1.0.3
-          with:
-            host: ${{ env.EC2_PUBLIC_IP }}
-            username: ${{ secrets.EC2_USER }}
-            key: ${{ secrets.EC2_SSH_KEY }}
-            command_timeout: 10m
-            script: |
-              # 1. Configuración de DuckDNS (Persistencia de IP)
-              mkdir -p ~/duckdns
-              DUCKDNS_DOMAIN=${{ secrets.DUCKDNS_DOMAIN }}
-              DUCKDNS_TOKEN=${{ secrets.DUCKDNS_TOKEN }}
-              EC2_USER=${{ secrets.EC2_USER }}
-              DOMAIN="${DUCKDNS_DOMAIN}.duckdns.org"
-
-              echo "echo url=\"https://www.duckdns.org/$DUCKDNS_DOMAIN/update?token=$DUCKDNS_TOKEN&ip=\" | curl -k -o /home/$EC2_USER/duckdns/duck.log -K -" > ~/duckdns/duck.sh
-              chmod 700 ~/duckdns/duck.sh
-              ~/duckdns/duck.sh
-
-              # 2. Detectar tipo de SO y configurar instalador
-              if [ -f /etc/os-release ]; then
-                  . /etc/os-release
-                  OS=$ID
-              else
-                  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-              fi
-
-              echo "Detected OS: $OS"
-
-              # 3. Instalar Docker si no existe
-              if ! command -v docker &> /dev/null; then
-                  echo "Instalando Docker..."
-                  if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-                      sudo apt-get update -y
-                      sudo apt-get install -y docker.io
-                  elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-                      sudo yum update -y
-                      sudo yum install -y docker
-                  fi
-                  sudo systemctl start docker
-                  sudo systemctl enable docker
-                  sudo usermod -aG docker $USER
-              fi
-
-              # 4. Instalar Nginx y Certbot
-              echo "Instalando Nginx y Certbot..."
-              if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-                  sudo apt-get install -y nginx certbot python3-certbot-nginx
-              elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-                  sudo yum install -y nginx certbot python3-certbot-nginx
-              fi
-
-              # 4b. Detener y deshabilitar Apache si está corriendo
-              echo "Parando Apache (httpd) si está corriendo..."
-              sudo systemctl stop httpd 2>/dev/null || true
-              sudo systemctl disable httpd 2>/dev/null || true
-
-              # 5. Configuración temporal de Nginx (sin certificados) para validación de Certbot
-              sudo mkdir -p /etc/nginx/conf.d
-              cat > /tmp/nginx-temp.conf << NGINXEOF
-server {
-    listen 80;
-    server_name ${DOMAIN};
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection keep-alive;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
-NGINXEOF
-              sudo cp /tmp/nginx-temp.conf /etc/nginx/conf.d/reverse-proxy.conf
-
-              # 5b. Iniciar Nginx
-              sudo systemctl enable nginx
-              sudo systemctl restart nginx
-
-              # 6. Generar certificado SSL con Let's Encrypt
-              CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }}
-
-              # Validar que el email no esté vacío
-              if [ -z "$CERTBOT_EMAIL" ]; then
-                  echo "ERROR: CERTBOT_EMAIL no está configurado en los secretos de GitHub"
-                  exit 1
-              fi
-
-              # Detener Nginx temporalmente para que Certbot pueda usar puerto 443
-              sudo systemctl stop nginx 2>/dev/null || true
-
-              if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-                  echo "Generando certificado SSL para $DOMAIN con email: $CERTBOT_EMAIL..."
-                  sudo certbot certonly --standalone -d "$DOMAIN" \
-                    --email "$CERTBOT_EMAIL" \
-                    --agree-tos \
-                    --non-interactive \
-                    --keep-until-expiring || echo "Advertencia: Certbot falló, continuando con configuración HTTP..."
-              fi
-
-              # 7. Configurar Nginx con SSL (si el certificado existe)
-              if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-                  echo "Certificado encontrado, configurando HTTPS..."
-                  cat > /tmp/nginx-ssl.conf << NGINXEOF
-server {
-    listen 80;
-    server_name ${DOMAIN};
-    return 301 https://\$server_name\$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name ${DOMAIN};
-
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-
-    access_log /var/log/nginx/access.log;
-    error_log /var/log/nginx/error.log;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection keep-alive;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
-NGINXEOF
-                  sudo cp /tmp/nginx-ssl.conf /etc/nginx/conf.d/reverse-proxy.conf
-              else
-                  echo "Certificado no encontrado, usando solo HTTP..."
-              fi
-
-              # 8. Validar y reiniciar Nginx
-              sudo nginx -t
-              sudo systemctl restart nginx
-
-              # 9. Configurar auto-renewal de certificados (Amazon Linux usa certbot-renew.timer)
-              if [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-                  sudo systemctl enable certbot-renew.timer
-                  sudo systemctl start certbot-renew.timer
-              else
-                  sudo systemctl enable certbot.timer
-                  sudo systemctl start certbot.timer
-              fi
-
-              # 10. Cargar imagen Docker y limpiar previos
-              sudo docker load -i /home/${{ secrets.EC2_USER }}/image.tar.gz
-              sudo docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
-              sudo docker rm ${{ env.CONTAINER_NAME }} 2>/dev/null || true
-
-              # 11. Ejecutar contenedor (HTTP en puerto 5000, sin HTTPS en la app)
-              sudo docker run -d \
-                --name ${{ env.CONTAINER_NAME }} \
-                --restart unless-stopped \
-                -p 5000:8080 \
-                -e ASPNETCORE_ENVIRONMENT=Production \
-                -e ASPNETCORE_URLS="http://+:8080" \
-                ${{ env.IMAGE_NAME }}:latest
-
-              # 12. Limpieza
-              rm -f /home/${{ secrets.EC2_USER }}/image.tar.gz
-              sudo docker image prune -f
-
-              # 13. Diagnóstico (para debugging)
-              echo "========== DIAGNÓSTICO =========="
-              echo "=== SO Detectado ==="
-              if [ -f /etc/os-release ]; then . /etc/os-release; echo "OS: $ID $VERSION"; fi
-
-              echo ""
-              echo "=== Estado de Nginx ==="
-              sudo systemctl status nginx --no-pager 2>&1 | head -10 || echo "Nginx no está disponible"
-
-              echo ""
-              echo "=== Estado del contenedor Docker ==="
-              sudo docker ps -a | grep ${{ env.CONTAINER_NAME }} || echo "Contenedor no encontrado"
-
-              echo ""
-              echo "=== Certificados instalados ==="
-              sudo certbot certificates 2>&1 || echo "Certbot no disponible"
-
-              echo ""
-              echo "=== Verificar si tenemos HTTPS ==="
-              if [ -d "/etc/letsencrypt/live" ]; then
-                  echo "✅ HTTPS está configurado"
-              else
-                  echo "⚠️  HTTPS no está disponible aún, usando HTTP"
-              fi
-
-              echo ""
-              echo "=== Prueba de conectividad al localhost:5000 ==="
-              curl -s http://localhost:5000 | head -5 || echo "No se pudo conectar"
-
-              echo ""
-              echo "=== Verificar puertos abiertos ==="
-              sudo netstat -tulpn 2>/dev/null | grep LISTEN || ss -tulpn | grep LISTEN
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.EC2_PUBLIC_IP }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            # Copiar templates a /tmp
+            cp /home/${{ secrets.EC2_USER }}/.github/scripts/nginx-http.conf.template /tmp/
+            cp /home/${{ secrets.EC2_USER }}/.github/scripts/nginx-https.conf.template /tmp/
+            
+            # Dar permisos y ejecutar script
+            chmod +x /home/${{ secrets.EC2_USER }}/.github/scripts/deploy.sh
+            
+            # Ejecutar con variables de entorno
+            export DUCKDNS_DOMAIN="${{ secrets.DUCKDNS_DOMAIN }}"
+            export DUCKDNS_TOKEN="${{ secrets.DUCKDNS_TOKEN }}"
+            export EC2_USER="${{ secrets.EC2_USER }}"
+            export CERTBOT_EMAIL="${{ secrets.CERTBOT_EMAIL }}"
+            export CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+            export IMAGE_NAME="${{ env.IMAGE_NAME }}"
+            
+            /home/${{ secrets.EC2_USER }}/.github/scripts/deploy.sh
+            
+            # Limpiar scripts
+            rm -rf /home/${{ secrets.EC2_USER }}/.github
