@@ -19,20 +19,19 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.JoinGam
             _gameRepository = gameRepository;
         }
 
-        public Task<GameState> Handle(JoinGameCommand request, CancellationToken cancellationToken)
+        public async Task<GameState> Handle(JoinGameCommand request, CancellationToken cancellationToken)
         {
-            var board = _gameRepository.GetAll(includeProperties: "Players,Cards").FirstOrDefault(g => g.Name == request.gameName);
+            var boards = await _gameRepository.GetAllAsync(g => g.Players, g => g.Cards);
+            var board = boards.FirstOrDefault(g => g.Name == request.gameName);
 
             if (board == null)
                 throw new KeyNotFoundException($"Game '{request.gameName}' not found");
 
             board = _joinGameUseCase.Execute(board, request.playerName);
 
-            // La entidad ya está siendo tracked desde GetAll(), solo Update() es necesario
-            _gameRepository.Update(board);
-            _gameRepository.SaveChanges();
+            await _gameRepository.UpdateAsync(board);
 
-            return Task.FromResult(board);
+            return board;
         }
     }
 }

@@ -10,87 +10,97 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
      * de los constructores de unit of work
      * 
      * */
-    public class GenericRepositoryEF<TEntity> : GenericRepositoryEFBase<TEntity>, IGenericRepository<TEntity> 
+    public class GenericRepositoryEF<TEntity> : GenericRepositoryEFBase<TEntity>, IGenericRepository<TEntity>
         where TEntity : class
     {
-        public GenericRepositoryEF(MyDbContext context) : base(context)
+        public GenericRepositoryEF(IMyDbContext context) : base(context)
         {
         }
 
-        #region public methods
+        #region Read Methods
 
-        public virtual IEnumerable<TEntity> GetAll(
-              Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-            )
+        public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (includes != null)
             {
-                query = query.Include(includeProperty);
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
             }
 
-            if (orderBy != null)
-            {
-                return orderBy(query);
-            }
-            else
-            {
-                return query;
-            }
+            return await query.ToListAsync();
         }
 
-        public virtual IEnumerable<TEntity> Get(
-              Expression<Func<TEntity, bool>> filter = null
-            , Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-            )
+        public async Task<IEnumerable<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>>? filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+            params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = _dbSet.AsNoTracking();
-
 
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (includes != null)
             {
-                query = query.Include(includeProperty);
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
             }
-
 
             if (orderBy != null)
             {
                 query = orderBy(query);
             }
-            else
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<TEntity?> GetByIdAsync(object id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
+        }
+
+        #endregion
+
+        #region Write Methods
+
+        public async Task<TEntity> AddAsync(TEntity entityToAdd)
+        {
+            await _dbSet.AddAsync(entityToAdd);
+            await SaveChangesAsync();
+            return entityToAdd;
+        }
+
+        public async Task<TEntity> UpdateAsync(TEntity entityToUpdate)
+        {
+            var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToUpdate);
+
+            if (existingEntity == null)
             {
+                _dbSet.Attach(entityToUpdate);
             }
 
-            return query;
+            ((DbContext)_context).Entry(entityToUpdate).State = EntityState.Modified;
+            await SaveChangesAsync();
+            return entityToUpdate;
         }
 
-        public TEntity GetById(object id)
-        {
-           throw new NotImplementedException();
-        }
-
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
-        {
-            //  AsNoTracking para que pueda hacer update sin error
-            return _dbSet.AsNoTracking().Where(predicate);
-        }
-
-       
-        public void Delete(TEntity entityToDelete)
+        public async Task DeleteAsync(TEntity entityToDelete)
         {
             var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToDelete);
+
             if (existingEntity != null)
             {
                 _dbSet.Remove(existingEntity);
@@ -100,74 +110,29 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
                 _dbSet.Attach(entityToDelete);
                 _dbSet.Remove(entityToDelete);
             }
+
+            await SaveChangesAsync();
         }
 
-        public void DeleteById(object id)
+        public async Task DeleteByIdAsync(object id)
         {
-            TEntity entityToDelete = _dbSet.Find(id);
+            var entityToDelete = await _dbSet.FindAsync(id);
             if (entityToDelete != null)
             {
-                Delete(entityToDelete);
+                await DeleteAsync(entityToDelete);
             }
         }
 
-        public void Add(TEntity entityToAdd)
+        public async Task<int> SaveChangesAsync()
         {
-            _dbSet.Add(entityToAdd);
-        }
-
-        public void Attach(TEntity entityToAttach)
-        {
-            _dbSet.Attach(entityToAttach);
-        }
-        public void Dettach(TEntity entityToAttach)
-        {
-            ((DbContext)_context).Entry<TEntity>(entityToAttach).State = EntityState.Detached;
-        }
-
-        public void Update(TEntity entityToUpdate)
-        {
-            var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToUpdate);
-
-            if (existingEntity == null)
+            try
             {
-                _dbSet.Attach(entityToUpdate);
+                return await ((DbContext)_context).SaveChangesAsync();
             }
-
-            ((DbContext)_context).Entry<TEntity>(entityToUpdate).State = EntityState.Modified;
-        }
-
-        public IEnumerable<TEntity> GetPagedElements<TKey>(
-              int pageIndex
-            , int pageCount
-            , Expression<Func<TEntity, TKey>> orderByExpression
-            , bool ascending = true
-            )
-        {
-            if (pageIndex < 1)
-                pageIndex = 1;
-
-            if (orderByExpression == (Expression<Func<TEntity, TKey>>)null)
-                throw new ArgumentNullException();
-
-            return (ascending)
-                ?
-                   _dbSet.OrderBy(orderByExpression)
-                   .Skip((pageIndex - 1) * pageCount)
-                   .Take(pageCount)
-                   .AsNoTracking()
-                   .ToList()
-                :
-                    _dbSet.OrderByDescending(orderByExpression)
-                    .Skip((pageIndex - 1) * pageCount)
-                    .Take(pageCount)
-                    .AsNoTracking()
-                    .ToList();
-        }
-
-        public void SaveChanges()
-        {
-            _context.SaveChanges();
+            finally
+            {
+                ((DbContext)_context).ChangeTracker.Clear();
+            }
         }
 
         #endregion

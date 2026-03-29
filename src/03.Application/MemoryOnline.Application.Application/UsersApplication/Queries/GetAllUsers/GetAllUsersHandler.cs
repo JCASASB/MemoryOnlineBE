@@ -14,10 +14,10 @@ namespace MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUs
             _userRepository = userRepository;
         }
 
-        public Task<List<Usuario>> Handle(GetAllUsersQuery query, CancellationToken cancellationToken)
+        public async Task<List<Usuario>> Handle(GetAllUsersQuery query, CancellationToken cancellationToken)
         {
-            var users = _userRepository.GetAll().ToList();
-            return Task.FromResult(users);
+            var users = await _userRepository.GetAllAsync();
+            return users.ToList();
         }
     }
 }

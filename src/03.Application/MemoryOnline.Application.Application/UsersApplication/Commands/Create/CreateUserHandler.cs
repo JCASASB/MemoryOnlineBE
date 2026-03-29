@@ -23,11 +23,7 @@ namespace MemoryOnline.Application.Application.UsersApplication.Commands.Create
                                         .WithPassword(password)
                                         .Build();
 
-            _userRepository.Add(user);
-            
-            _userRepository.SaveChanges();
-
-            await Task.CompletedTask;
+            await _userRepository.AddAsync(user);
         }
     }
 }

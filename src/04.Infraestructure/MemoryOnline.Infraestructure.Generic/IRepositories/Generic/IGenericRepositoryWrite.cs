@@ -1,17 +1,15 @@
 ﻿namespace MemoryOnline.Infraestructure.Generic.IRepositories.Generic
 {
-    public interface IGenericRepositoryWrite<TEntity> : IGenericBaseRepository<TEntity>
+    public interface IGenericRepositoryWrite<TEntity> 
     {
-        void DeleteById(object id);
+        Task DeleteAsync(TEntity entityToDelete);
 
-        void Delete(TEntity entityToDelete);
+        Task DeleteByIdAsync(object id);
 
-        void Add(TEntity entityToAdd);
+        Task<TEntity> AddAsync(TEntity entityToAdd);
 
-        void Attach(TEntity entityToAttach);
+        Task<TEntity> UpdateAsync(TEntity entityToUpdate);
 
-        void Update(TEntity entityToUpdate);
-
-        void SaveChanges();
+        Task<int> SaveChangesAsync();
     }
 }

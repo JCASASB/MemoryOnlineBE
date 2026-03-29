@@ -1,5 +1,6 @@
 using MemoryOnline.Domain.Entities;
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -14,10 +15,10 @@ namespace MemoryOnline.Repository.Repository
         
         }
 
-        public DbSet<GameState> Games { get; set; }
-        public DbSet<Player> Players { get; set; }
-        public DbSet<Card> Cards { get; set; }
-        public DbSet<Usuario> Users { get; set; }
+        public DbSet<GameState> Games => Set<GameState>();
+        public DbSet<Player> Players => Set<Player>();
+        public DbSet<Card> Cards => Set<Card>();
+        public DbSet<Usuario> Users => Set<Usuario>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
