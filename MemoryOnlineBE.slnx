@@ -17,15 +17,9 @@
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Generic/MemoryOnline.Infraestructure.Generic.csproj" />
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Repository/MemoryOnline.Infraestructure.IRepository.csproj" Id="fce085b7-9b5c-4690-b698-b69409988287" />
   </Folder>
-  <Folder Name="/src/04.Repository/">
-    <Project Path="src/04.Repository/MemoryOnline.Repository.Repository/MemoryOnline.Repository.Repository.csproj" />
-  </Folder>
   <Folder Name="/src/05.Common/">
     <Project Path="src/05.Common/MemoryOnline.Common.IOC/MemoryOnline.Common.IOC.csproj" />
   </Folder>
-  <Project Path="BenchmarkSuite1/BenchmarkSuite1.csproj" />
-  <Project Path="BenchmarkSuite2/BenchmarkSuite2.csproj" />
-  <Project Path="BenchmarkSuite3/BenchmarkSuite3.csproj" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
