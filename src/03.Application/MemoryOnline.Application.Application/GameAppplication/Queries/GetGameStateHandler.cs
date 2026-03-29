@@ -14,9 +14,10 @@ namespace MemoryOnline.Application.Application.GameAppplication.Queries
             _gameRepository = gameRepository;
         }
 
-        public Task<GameState> Handle(GetGameStateQuery request, CancellationToken cancellationToken)
+        public async Task<GameState> Handle(GetGameStateQuery request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(_gameRepository.GetAll().Where(g => g.Name == request.gameName).ToList().First());
+            var games = await _gameRepository.GetAllAsync();
+            return games.Where(g => g.Name == request.gameName).First();
         }
     }
 }

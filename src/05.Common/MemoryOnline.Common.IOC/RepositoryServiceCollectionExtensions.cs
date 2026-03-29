@@ -42,7 +42,9 @@ namespace MemoryOnline.Repository.Repository
         public static IServiceCollection AddGenericRepositoryConfiguration(this IServiceCollection services)
         {
 
-            // services.AddScoped(typeof(IMyDbContext), typeof(MyDbContext));
+            // Registrar la interfaz para que se inyecte el mismo contexto
+            services.AddScoped<IMyDbContext>(provider =>
+                provider.GetRequiredService<MyDbContext>());
 
             services.AddDbContext<MyDbContext>(options =>
             {

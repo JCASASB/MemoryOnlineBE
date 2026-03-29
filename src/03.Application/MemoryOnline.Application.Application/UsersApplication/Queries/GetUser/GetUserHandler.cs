@@ -15,10 +15,11 @@ namespace MemoryOnline.Application.Application.UsersApplication.Queries.GetUser
             _userRepository = userRepository;
         }
 
-        public Task<Usuario> Handle(GetUserQuery request, CancellationToken cancellationToken)
+        public async Task<Usuario> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
-            var user = _userRepository.GetAll().Where(u => u.Name == request.name).ToList().First();
-            return Task.FromResult(user);
+            var users = await _userRepository.GetAllAsync();
+            var user = users.Where(u => u.Name == request.name).First();
+            return user;
         }
     }
 }

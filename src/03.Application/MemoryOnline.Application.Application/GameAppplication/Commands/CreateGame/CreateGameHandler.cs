@@ -2,7 +2,6 @@ using MediatR;
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
-using MemoryOnline.Infraestructure.IRepository;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateGame
 {
@@ -22,10 +21,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateG
         public async Task Handle(CreateGameCommand request, CancellationToken cancellationToken)
         {
             var game = _createGameUseCase.Execute(request.PlayerName, request.GameName, request.GameId, request.Level);
-            _gameRepository.Add(game);
-            _gameRepository.SaveChanges();
-
-            await Task.CompletedTask;
+            await _gameRepository.AddAsync(game);
         }
     }
 }

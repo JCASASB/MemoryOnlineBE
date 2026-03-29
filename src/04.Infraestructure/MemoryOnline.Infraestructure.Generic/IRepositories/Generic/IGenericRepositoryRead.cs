@@ -2,30 +2,17 @@
 
 namespace MemoryOnline.Infraestructure.Generic.IRepositories.Generic
 {
-    public interface IGenericRepositoryRead<TEntity> : IGenericBaseRepository<TEntity>
+    public interface IGenericRepositoryRead<TEntity> 
     {
-        IEnumerable<TEntity> Get(
-            Expression<Func<TEntity, bool>> filter = null
-            , Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-        );
+        Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes);
 
-        IEnumerable<TEntity> GetAll(
-              Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-        );
+        Task<IEnumerable<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>>? filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+            params Expression<Func<TEntity, object>>[] includes);
 
-        TEntity GetById(object id);
-        IEnumerable<TEntity> GetPagedElements<TKey>(int pageIndex, int pageCount,
-           Expression<Func<TEntity, TKey>> orderByExpression, bool ascending = true);
+        Task<TEntity?> GetByIdAsync(object id);
 
-     
-
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-
-        
-
+        Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
     }
 }
