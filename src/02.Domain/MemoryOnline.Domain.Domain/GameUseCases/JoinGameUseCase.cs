@@ -16,7 +16,9 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
 
             game.AddPlayer(player);
 
-            game.InitializeCards();
+            // NO reinicializar cartas cuando alguien se une - solo inicializar en la primera llamada
+            // o cuando se crea el juego
+            game.InitializeCards(reinitialize: false);
 
             return game;
         }

@@ -13,7 +13,7 @@ namespace MemoryOnline.Application.Application
 
         public Boolean ValidateUser(string name, string password)
         {
-            var user = _userRepository.GetUserByName(name);
+            var user = _userRepository.GetUserByName(name).ToList().First();
 
             return user != null && user.Password == password;
         }

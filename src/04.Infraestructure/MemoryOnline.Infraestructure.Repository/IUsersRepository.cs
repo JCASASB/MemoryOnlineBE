@@ -1,15 +1,13 @@
 ﻿using MemoryOnline.Domain.Entities;
+using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
 
 namespace MemoryOnline.Infraestructure.IRepository
 {
     public interface IUsersRepository 
     {
-        public void Add(Usuario entityToAdd);
-
-        public List<Usuario> GetAll();
-
-        public Usuario GetUserByName(string name);
-
+        IEnumerable<Usuario> GetAll();
+        IEnumerable<Usuario> GetUserByName(string name);
+        void Add(Usuario entityToAdd);
 
     }
 }

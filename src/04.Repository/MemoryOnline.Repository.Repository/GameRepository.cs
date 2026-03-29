@@ -19,15 +19,13 @@ namespace MemoryOnline.Repository.Repository
             _context.SaveChanges();
         }
 
-
-        public GameState? GetGame(Guid id)
+        public GameState? Get(Guid id)
         {
             return _context.Games
                 .Include(g => g.Players)
                 .Include(g => g.Cards)
                 .FirstOrDefault(g => g.Id == id);
         }
-
 
         public GameState? GetGameByName(string gameName)
         {
@@ -39,12 +37,22 @@ namespace MemoryOnline.Repository.Repository
         }
 
 
-        public List<GameState> GetAllGames()
+        public List<GameState> GetAll()
         {
             return _context.Games
                 .Include(g => g.Players)
                 .Include(g => g.Cards)
                 .ToList();
+        }
+
+        public void Delete(Guid id)
+        {
+            var game = _context.Games.Find(id);
+            if (game != null)
+            {
+                _context.Games.Remove(game);
+                _context.SaveChanges();
+            }
         }
 
 
@@ -78,6 +86,31 @@ namespace MemoryOnline.Repository.Repository
                 _context.Games.Remove(game);
                 _context.SaveChanges();
             }
+        }
+
+        public void Add(GameState game)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<GameState> IGameRepository.Get(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<GameState> IGameRepository.GetGameByName(string gameName)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<GameState> IGameRepository.GetAll()
+        {
+            return GetAll();
+        }
+
+        public void Update(GameState game)
+        {
+            throw new NotImplementedException();
         }
     }
 }

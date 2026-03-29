@@ -25,7 +25,7 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
             , string includeProperties = ""
             )
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
             foreach (var includeProperty in includeProperties.Split
                 (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -50,7 +50,7 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
             , string includeProperties = ""
             )
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
 
             if (filter != null)
@@ -78,7 +78,7 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
 
         public TEntity GetById(object id)
         {
-            return _dbSet.Find(id);
+           throw new NotImplementedException();
         }
 
         public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
@@ -90,14 +90,25 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
        
         public void Delete(TEntity entityToDelete)
         {
-            _dbSet.Attach(entityToDelete);
-            _dbSet.Remove(entityToDelete);
+            var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToDelete);
+            if (existingEntity != null)
+            {
+                _dbSet.Remove(existingEntity);
+            }
+            else
+            {
+                _dbSet.Attach(entityToDelete);
+                _dbSet.Remove(entityToDelete);
+            }
         }
 
         public void DeleteById(object id)
         {
             TEntity entityToDelete = _dbSet.Find(id);
-            Delete(entityToDelete);
+            if (entityToDelete != null)
+            {
+                Delete(entityToDelete);
+            }
         }
 
         public void Add(TEntity entityToAdd)
@@ -116,6 +127,13 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
 
         public void Update(TEntity entityToUpdate)
         {
+            var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToUpdate);
+
+            if (existingEntity == null)
+            {
+                _dbSet.Attach(entityToUpdate);
+            }
+
             ((DbContext)_context).Entry<TEntity>(entityToUpdate).State = EntityState.Modified;
         }
 
@@ -137,11 +155,13 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
                    _dbSet.OrderBy(orderByExpression)
                    .Skip((pageIndex - 1) * pageCount)
                    .Take(pageCount)
+                   .AsNoTracking()
                    .ToList()
                 :
                     _dbSet.OrderByDescending(orderByExpression)
                     .Skip((pageIndex - 1) * pageCount)
                     .Take(pageCount)
+                    .AsNoTracking()
                     .ToList();
         }
 
