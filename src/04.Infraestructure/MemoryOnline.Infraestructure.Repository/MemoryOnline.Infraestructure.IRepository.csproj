@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
+    <ProjectReference Include="..\MemoryOnline.Infraestructure.Generic\MemoryOnline.Infraestructure.Generic.csproj" />
   </ItemGroup>
 
 </Project>

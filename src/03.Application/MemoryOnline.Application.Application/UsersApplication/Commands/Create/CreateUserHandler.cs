@@ -1,14 +1,14 @@
 ﻿using MediatR;
 using MemoryOnline.Domain.Entities;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
 
 namespace MemoryOnline.Application.Application.UsersApplication.Commands.Create
 {
     public class CreateUserHandler : IRequestHandler<CreateUserCommand>
     {
-        private readonly IUsersRepository _userRepository;
+        private readonly IGenericRepository<Usuario> _userRepository;
 
-        public CreateUserHandler(IUsersRepository userRepository)
+        public CreateUserHandler(IGenericRepository<Usuario> userRepository)
         {
             _userRepository = userRepository;
         }
@@ -18,8 +18,14 @@ namespace MemoryOnline.Application.Application.UsersApplication.Commands.Create
             var name = request.userDto.GetProperty("username").GetString();
             var password = request.userDto.GetProperty("password").GetString();
 
-            var user = new Usuario { Name = name, Password = password };
+            var user = new Usuario.Builder()
+                                        .WithName(name)
+                                        .WithPassword(password)
+                                        .Build();
+
             _userRepository.Add(user);
+            
+            _userRepository.SaveChanges();
 
             await Task.CompletedTask;
         }

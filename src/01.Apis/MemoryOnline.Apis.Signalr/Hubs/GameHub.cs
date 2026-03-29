@@ -28,47 +28,38 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         private async Task ResponseGameState(string clientGroupId, GameState newGame)
         {
             var dtoGameState = _mapper.Map<GameStateDtoOut>(newGame);
-
             var json = JsonConvert.SerializeObject(dtoGameState);
-            await Clients.Group(clientGroupId).SendAsync("GameStateUpdated", json);
 
-            await Clients.Group(clientGroupId).SendAsync("LogFromServer", json);
+            var groupClients = Clients.Group(clientGroupId);
+            await groupClients.SendAsync("GameStateUpdated", json);
+            await groupClients.SendAsync("LogFromServer", json);
         }
 
         public async Task JoinGame(string playerName, string gameName)
         {
-            Console.WriteLine($"[SignalR] Player {Context.ConnectionId} ({playerName}) joining game {gameName}");
-
             try
             {
                 var newGame = await _mediator.Send(new JoinGameCommand(playerName, gameName));
 
                 string clientGroupId = newGame.Id.ToString();
-                await Groups.AddToGroupAsync(Context.ConnectionId, newGame.Id.ToString());
+                await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
                 await ResponseGameState(clientGroupId, newGame);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SignalR] Error joining game {gameName}: {ex.Message}");
                 await Clients.Caller.SendAsync("Error", ex.Message);
             }
         }
 
         public async Task LeaveGame(string gameId)
         {
-            Console.WriteLine($"[SignalR] Player {Context.ConnectionId} leaving game {gameId}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, gameId);
             await Clients.Group(gameId).SendAsync("PlayerLeft", Context.ConnectionId);
-            Console.WriteLine($"[SignalR] Player {Context.ConnectionId} successfully left game {gameId}");
         }
 
         public async Task CreateGame(GameStateDtoIn updatedGame)
         {
-            Console.WriteLine($"[SignalR] Player {Context.ConnectionId} ");
-
-            Guid gameId = Guid.NewGuid();
-
             try
             {
                 var domObj = _mapper.Map<GameState>(updatedGame);
@@ -83,14 +74,11 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SignalR] Error creating game: {ex.Message}");
                 await Clients.Caller.SendAsync("Error", ex.Message);
             }
         }
         public async Task UpdateGameState(GameStateDtoIn updatedGame)
         {
-            Console.WriteLine($"[SignalR] UpdateGameState called for game {updatedGame.Id}");
-
             var domObj = _mapper.Map<GameState>(updatedGame);
 
             await _mediator.Send(new UpdateGameStateCommand(domObj));
@@ -101,13 +89,11 @@ namespace MemoryOnline.Apis.Signalr.Hubs
 
         public async Task GetGameState(string gameName)
         {
-            Console.WriteLine($"[SignalR] UpdateGameState called for game {gameName}");
             var newGame = await _mediator.Send(new GetGameStateQuery(gameName));
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Console.WriteLine($"[SignalR] Player {Context.ConnectionId} disconnected. Exception: {exception?.Message ?? "None"}");
             await base.OnDisconnectedAsync(exception);
         }
     }

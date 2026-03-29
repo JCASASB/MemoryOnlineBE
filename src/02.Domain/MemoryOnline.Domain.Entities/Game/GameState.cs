@@ -27,10 +27,21 @@ namespace MemoryOnline.Domain.Entities.Game
             return true;
         }
 
-        public void InitializeCards()
+        public void InitializeCards(bool reinitialize = false)
         {
-            // Limpiamos cartas previas para evitar duplicados si se re-inicializa
-            this.Cards.Clear();
+            // Solo inicializar si no hay cartas o si se solicita explícitamente reinicializar
+            if (this.Cards.Count > 0 && !reinitialize)
+                return;
+
+            // Limpiar cartas previas si reinicializamos
+            if (reinitialize && this.Cards.Count > 0)
+            {
+                var cardsToRemove = this.Cards.ToList();
+                foreach (var card in cardsToRemove)
+                {
+                    this.Cards.Remove(card);
+                }
+            }
 
             var deck = new List<Card>();
             var random = new Random();

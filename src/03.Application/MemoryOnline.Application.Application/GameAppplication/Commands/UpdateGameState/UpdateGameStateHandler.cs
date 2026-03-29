@@ -1,28 +1,34 @@
 ﻿using MediatR;
+using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
 using MemoryOnline.Infraestructure.IRepository;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState
 {
     public class UpdateGameStateHandler : IRequestHandler<UpdateGameStateCommand>
     {
-        private readonly IGameRepository _gameRepository;
+        private readonly IGenericRepository<GameState> _gameRepository;
 
-        public UpdateGameStateHandler(IGameRepository gameRepository)
+        public UpdateGameStateHandler(IGenericRepository<GameState> gameRepository)
         {
             _gameRepository = gameRepository;
         }
 
         public async Task Handle(UpdateGameStateCommand request, CancellationToken cancellationToken)
         {
-            var board = _gameRepository.GetGameByName(request.gameState.Name);
+            var board = _gameRepository.GetAll(includeProperties: "Players,Cards").FirstOrDefault(u => u.Name == request.gameState.Name);
+
             if (board == null)
             {
-                _gameRepository.AddGame(request.gameState);
+                _gameRepository.Add(request.gameState);
             }
             else
             {
-                _gameRepository.UpdateGame(request.gameState);
+                _gameRepository.Attach(request.gameState);
+                _gameRepository.Update(request.gameState);
             }
+
+            _gameRepository.SaveChanges();
 
             await Task.CompletedTask;
         }
