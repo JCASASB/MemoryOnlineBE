@@ -20,9 +20,6 @@
   <Folder Name="/src/05.Common/">
     <Project Path="src/05.Common/MemoryOnline.Common.IOC/MemoryOnline.Common.IOC.csproj" />
   </Folder>
-  <Project Path="BenchmarkSuite1/BenchmarkSuite1.csproj" />
-  <Project Path="BenchmarkSuite2/BenchmarkSuite2.csproj" />
-  <Project Path="BenchmarkSuite3/BenchmarkSuite3.csproj" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
