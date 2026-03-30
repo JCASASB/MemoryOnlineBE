@@ -9,6 +9,7 @@ namespace MemoryOnline.Apis.Utils.DTOs.In
         public string Name { get; set; }
         public bool IsProcessing { get; set; }
         public int Level { get; set; }
+        public int Version { get; set; }
         public List<CardDtoIn> Cards { get; set; }
         public List<PlayerDtoIn> Players { get; set; }
     }

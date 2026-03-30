@@ -6,7 +6,9 @@ namespace MemoryOnline.Domain.Entities.Game
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public int Level { get; private set; }
+
         public bool IsProcessing { get; private set; }
+        public int Version { get; private set; }
         public virtual ICollection<Card> Cards { get; private set; } = new List<Card>();
         public virtual ICollection<Player> Players { get; private set; } = new List<Player>();
 
@@ -91,6 +93,7 @@ namespace MemoryOnline.Domain.Entities.Game
             public Builder WithId(Guid id) { _state.Id = id; return this; }
             public Builder WithName(string name) { _state.Name = name; return this; }
             public Builder WithLevel(int level) { _state.Level = level; return this; }
+            public Builder WithVersion(int version) { _state.Version = version; return this; }
 
             public GameState Build()
             {

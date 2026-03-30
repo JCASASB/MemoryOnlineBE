@@ -3,8 +3,8 @@ namespace MemoryOnline.Domain.Entities.Game
 {
     public enum CardState
     {
-        FaceDown,
-        FaceUp,
-        Matched
+        FaceDown = 0,
+        FaceUp = 1,
+        Matched = 2
     }
 }

@@ -24,9 +24,9 @@ namespace MemoryOnline.Apis.Utils
             config.NewConfig<CardDtoIn, Card>()
                 .ConstructUsing(src => new Card.Builder()
                     .WithId(Guid.Parse(src.Id))
-                    .WithValue(int.Parse(src.Value))
+                    .WithValue(src.Value)
                     .WithImage(src.ImgUrl)
-                    .WithState(src.IsMatched ? CardState.Matched : (src.IsRevealed ? CardState.FaceUp : CardState.FaceDown))
+                    .WithState(src.State)
                     .Build());
 
             // 3. Mapeo de GameState (El objeto principal)
@@ -35,6 +35,7 @@ namespace MemoryOnline.Apis.Utils
                     .WithId(Guid.Parse(src.Id))
                     .WithName(src.Name)
                     .WithLevel(src.Level)
+                    .WithVersion(src.Version)
                     .Build())
                 // ¡ESTO ES LO MÁS IMPORTANTE! 
                 // Evita que Mapster intente hacer: dest.Players = src.Players
@@ -75,8 +76,7 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.id, src => src.Id.ToString())
                 .Map(dest => dest.value, src => src.Value.ToString())
                 .Map(dest => dest.imgUrl, src => src.ImgUrl) // <-- Revisa si en Card es 'ImgUrl' o 'Image'
-                .Map(dest => dest.isRevealed, src => src.State == CardState.FaceUp || src.State == CardState.Matched)
-                .Map(dest => dest.isMatched, src => src.State == CardState.Matched);
+                .Map(dest => dest.state, src => src.State);
 
             // --- MAPEO DE GAMESTATE (Dominio -> DTO Out) ---
             config.NewConfig<GameState, GameStateDtoOut>()
@@ -84,6 +84,7 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.name, src => src.Name)
                 .Map(dest => dest.level, src => src.Level)
                 .Map(dest => dest.isProcessing, src => src.IsProcessing)
+                .Map(dest => dest.version, src => src.Version)
                 // Al tener configurados Player y Card arriba, estas listas ya no saldrán null
                 .Map(dest => dest.cards, src => src.Cards)
                 .Map(dest => dest.players, src => src.Players);

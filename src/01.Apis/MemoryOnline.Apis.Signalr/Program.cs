@@ -1,9 +1,10 @@
 using MemoryOnline.Apis.Signalr;
 using MemoryOnline.Apis.Signalr.Hubs;
-using MemoryOnline.Common.IOC;
-using Microsoft.AspNetCore.SignalR;
 using MemoryOnline.Apis.Utils;
 using MemoryOnline.Application.Application.GameAppplication.Commands.JoinGame;
+using MemoryOnline.Common.IOC;
+using Microsoft.AspNetCore.SignalR;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,8 @@ builder.Services.AddSignalR(options =>
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.PayloadSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
 // Registrar dependencias centralizadas (IOC)

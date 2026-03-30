@@ -11,6 +11,7 @@ namespace MemoryOnline.Apis.Utils.DTOs.Out
         public List<CardDtoOut>? cards { get; set; }
         public bool isProcessing { get; set; }
         public int level { get; set; }
+        public int version { get; set; }
         public List<PlayerDtoOut>? players { get; set; }
     }
 }
