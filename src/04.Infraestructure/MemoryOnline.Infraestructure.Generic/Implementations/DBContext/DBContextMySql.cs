@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MemoryOnline.Infraestructure.Generic.ConfigurationExtension;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.Generic.DBContext
 {
-    public class DBContextMySql : DBContextMyBase, IMyDbContext
+
+    public class DBContextMySql : BaseDbContext
     {
-        public DBContextMySql(IConfiguration config) : base(config)
+        public DBContextMySql(DbContextOptions options, IConfiguration config) : base(options, config)
         {
-            _connectionString = GetConnectionString();
+            _connectionString = config.MyGetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

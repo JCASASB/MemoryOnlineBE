@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MemoryOnline.Infraestructure.Generic.ConfigurationExtension;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.Generic.DBContext
 {
-    public class DBContextPostgres : DBContextMyBase, IMyDbContext
+    public class DBContextPostgres : BaseDbContext
     {
-        public DBContextPostgres(IConfiguration config) : base(config)
+        public DBContextPostgres(DbContextOptions options, IConfiguration config) : base(options, config)
         {
-            _connectionString = GetConnectionString();
+            _connectionString = config.MyGetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MemoryOnline.Infraestructure.Generic.ConfigurationExtension;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.Generic.DBContext
 {
-    public class DbContextSqlServer : DBContextMyBase, IMyDbContext
+    public class DbContextSqlServer : BaseDbContext
     {
-        public DbContextSqlServer(IConfiguration config) : base(config)
+        public DbContextSqlServer(DbContextOptions options, IConfiguration config) : base(options, config)
         {
-            _connectionString = GetConnectionString();
+            _connectionString = config.MyGetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

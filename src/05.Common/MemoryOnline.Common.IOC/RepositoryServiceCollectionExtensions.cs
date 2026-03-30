@@ -17,10 +17,7 @@ namespace MemoryOnline.Repository.Repository
             services.AddScoped<IMyDbContext>(provider =>
                 provider.GetRequiredService<MyDbContext>());
 
-            services.AddDbContext<MyDbContext>(options =>
-            {
-                options.UseInMemoryDatabase("loquesea");
-            });
+            services.AddDbContext<MyDbContext>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositoryEF<>));
             services.AddScoped(typeof(IGenericRepositoryRead<>), typeof(GenericRepositoryEFRead<>));
