@@ -81,7 +81,7 @@ sudo systemctl enable nginx
 sudo systemctl restart nginx
 
 # ===========================================
-# 6. Generar certificado SSL
+# 6. Generar/Renovar certificado SSL
 # ===========================================
 if [ -z "$CERTBOT_EMAIL" ]; then
     echo "⚠️  CERTBOT_EMAIL no configurado, saltando SSL..."
@@ -95,23 +95,29 @@ else
     # Esperar 2 segundos para que libere los puertos
     sleep 2
 
-    # Si no existe el certificado, intentar generarlo
-    if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "   - Generando certificado SSL para $DOMAIN..."
+    # Si el certificado ya existe, renovarlo
+    if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+        echo "   - Renovando certificado SSL existente para $DOMAIN..."
         sudo certbot certonly --standalone -d "$DOMAIN" \
             --email "$CERTBOT_EMAIL" \
             --agree-tos \
             --non-interactive \
-            --keep-until-expiring || {
-            echo "⚠️  Error: Certbot falló, continuando con HTTP..."
+            --force-renewal || {
+            echo "⚠️  Error: Renovación de certbot falló, usando certificado existente..."
         }
     else
-        echo "   - Certificado ya existe"
+        echo "   - Generando certificado SSL nuevo para $DOMAIN..."
+        sudo certbot certonly --standalone -d "$DOMAIN" \
+            --email "$CERTBOT_EMAIL" \
+            --agree-tos \
+            --non-interactive || {
+            echo "⚠️  Error: Certbot falló, continuando con HTTP..."
+        }
     fi
 
-    # Verificar si el certificado se creó
+    # Verificar si el certificado existe
     if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-        echo "   ✅ Certificado SSL validado"
+        echo "   ✅ Certificado SSL validado/renovado"
     else
         echo "   ⚠️  Certificado NO disponible, usará HTTP"
     fi
