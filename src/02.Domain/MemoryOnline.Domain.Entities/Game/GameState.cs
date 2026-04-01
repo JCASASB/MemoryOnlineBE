@@ -29,6 +29,11 @@ namespace MemoryOnline.Domain.Entities.Game
             return true;
         }
 
+        public void AddVersion()
+        {
+            Version++;
+        }
+
         public void InitializeCards(bool reinitialize = false)
         {
             // Solo inicializar si no hay cartas o si se solicita explícitamente reinicializar

@@ -20,6 +20,8 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
             // o cuando se crea el juego
             game.InitializeCards(reinitialize: false);
 
+            game.AddVersion();
+
             return game;
         }
 
