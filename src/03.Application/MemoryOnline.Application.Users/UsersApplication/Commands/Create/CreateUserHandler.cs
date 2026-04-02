@@ -2,7 +2,7 @@
 using MemoryOnline.Domain.Entities;
 using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
 
-namespace MemoryOnline.Application.Application.UsersApplication.Commands.Create
+namespace MemoryOnline.Application.Users.UsersApplication.Commands.Create
 {
     public class CreateUserHandler : IRequestHandler<CreateUserCommand>
     {

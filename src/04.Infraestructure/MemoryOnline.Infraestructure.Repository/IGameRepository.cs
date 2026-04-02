@@ -4,11 +4,11 @@ namespace MemoryOnline.Infraestructure.IRepository
 {
     public interface IGameRepository
     {
-        IEnumerable<GameState> Get(Guid id);
-        IEnumerable<GameState> GetGameByName(string gameName);
-        IEnumerable<GameState> GetAll();
-        void Add(GameState game);
-        void Update(GameState game);
-        void Delete(Guid id);
+        IEnumerable<GameState> GetAsync(Guid id);
+        IEnumerable<GameState> GetGameByNameAsync(string gameName);
+        IEnumerable<GameState> GetAllAsync();
+        void AddAsync(GameState game);
+        void UpdateAsync(GameState game);
+        void DeleteAsync(Guid id);
     }
 }

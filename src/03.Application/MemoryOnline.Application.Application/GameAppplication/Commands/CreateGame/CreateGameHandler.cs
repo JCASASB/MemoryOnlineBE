@@ -2,16 +2,17 @@ using MediatR;
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
+using MemoryOnline.Infraestructure.IRepository;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateGame
 {
     public class CreateGameHandler : IRequestHandler<CreateGameCommand>
     {
         private readonly ICreateGameUseCase _createGameUseCase;
-        private readonly IGenericRepository<GameState> _gameRepository;
+        private readonly IGameRepository _gameRepository;
 
         public CreateGameHandler(
-            IGenericRepository<GameState> gameRepository
+            IGameRepository gameRepository
             , ICreateGameUseCase createGameUseCase)
         {
             _createGameUseCase = createGameUseCase;
@@ -21,7 +22,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateG
         public async Task Handle(CreateGameCommand request, CancellationToken cancellationToken)
         {
             var game = _createGameUseCase.Execute(request.PlayerName, request.GameName, request.GameId, request.Level);
-            await _gameRepository.AddAsync(game);
+            _gameRepository.AddAsync(game);
         }
     }
 }

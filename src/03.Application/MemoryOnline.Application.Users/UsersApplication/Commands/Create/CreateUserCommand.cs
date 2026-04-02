@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace MemoryOnline.Application.Application.UsersApplication.Commands.Create
+namespace MemoryOnline.Application.Users.UsersApplication.Commands.Create
 {
     public record CreateUserCommand(dynamic userDto) : IRequest;
 

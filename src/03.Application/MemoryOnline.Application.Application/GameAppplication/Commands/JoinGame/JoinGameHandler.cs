@@ -9,10 +9,10 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.JoinGam
     public class JoinGameHandler : IRequestHandler<JoinGameCommand, GameState>
     {
         private readonly IJoinGameUseCase _joinGameUseCase;
-        private readonly IGenericRepository<GameState> _gameRepository;
+        private readonly IGameRepository _gameRepository;
 
         public JoinGameHandler(
-            IGenericRepository<GameState> gameRepository
+            IGameRepository gameRepository
             , IJoinGameUseCase joinGameUseCase)
         {
             _joinGameUseCase = joinGameUseCase;
@@ -21,15 +21,17 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.JoinGam
 
         public async Task<GameState> Handle(JoinGameCommand request, CancellationToken cancellationToken)
         {
-            var boards = await _gameRepository.GetAllAsync(g => g.Players, g => g.Cards);
-            var board = boards.FirstOrDefault(g => g.Name == request.gameName);
+            var boards = _gameRepository.GetGameByNameAsync(request.gameName);
+            var board = boards.FirstOrDefault();
 
             if (board == null)
                 throw new KeyNotFoundException($"Game '{request.gameName}' not found");
 
+            Console.WriteLine($"Game found: {board.Name}, Players count: {board.Players?.Count ?? 0}");
+
             board = _joinGameUseCase.Execute(board, request.playerName);
 
-            await _gameRepository.UpdateAsync(board);
+            _gameRepository.UpdateAsync(board);
 
             return board;
         }

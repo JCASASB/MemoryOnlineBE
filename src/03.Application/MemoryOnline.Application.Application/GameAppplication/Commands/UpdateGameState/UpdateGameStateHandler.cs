@@ -7,25 +7,25 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.UpdateG
 {
     public class UpdateGameStateHandler : IRequestHandler<UpdateGameStateCommand>
     {
-        private readonly IGenericRepository<GameState> _gameRepository;
+        private readonly IGameRepository _gameRepository;
 
-        public UpdateGameStateHandler(IGenericRepository<GameState> gameRepository)
+        public UpdateGameStateHandler(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }
 
         public async Task Handle(UpdateGameStateCommand request, CancellationToken cancellationToken)
         {
-            var boards = await _gameRepository.GetAllAsync(g => g.Players, g => g.Cards);
-            var board = boards.FirstOrDefault(u => u.Name == request.gameState.Name);
+            var boards = _gameRepository.GetAllAsync();
+            var board = boards.FirstOrDefault(g => g.Name == request.gameState.Name);
 
             if (board == null)
             {
-                await _gameRepository.AddAsync(request.gameState);
+                _gameRepository.AddAsync(request.gameState);
             }
             else
             {
-                await _gameRepository.UpdateAsync(request.gameState);
+                _gameRepository.UpdateAsync(request.gameState);
             }
         }
     }
