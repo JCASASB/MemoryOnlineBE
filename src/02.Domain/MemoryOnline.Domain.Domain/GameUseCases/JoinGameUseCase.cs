@@ -7,23 +7,82 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
     {
         public GameState Execute(GameState game, string playerName)
         {
-            var player = new Player.Builder()
-                .WithId(Guid.NewGuid())
-                .WithName(playerName)
-                .WithTurn(true)
-                // .WithPoints(0) -> Esto debería ser el default en el Builder
-                .Build();
+            var countPlayers = game.Players.Count;
 
-            game.AddPlayer(player);
+            // Crear el nuevo jugador como POCO
+            var player = new Player
+            {
+                Name = playerName,
+                RemainMoves = 2,
+                TotalMoves = 0,
+                Points = 0,
+                GameStateId = game.Id,
+                Turn = countPlayers == 1 // El segundo jugador es quien inicia
+            };
 
-            // NO reinicializar cartas cuando alguien se une - solo inicializar en la primera llamada
-            // o cuando se crea el juego
-            game.InitializeCards(reinitialize: false);
+            game.Players.Add(player);
 
-            game.AddVersion();
+            // Inicializar cartas cuando se une el segundo jugador
+            if (countPlayers == 1)
+            {
+                InitializeCards(game, reinitialize: false);
+            }
+
+            // Incrementar versión
+            game.Version++;
 
             return game;
         }
 
+        private void InitializeCards(GameState game, bool reinitialize = false)
+        {
+            // Solo inicializar si no hay cartas o si se solicita explícitamente reinicializar
+            if (game.Cards.Count > 0 && !reinitialize)
+                return;
+
+            // Limpiar cartas previas si reinicializamos
+            if (reinitialize && game.Cards.Count > 0)
+            {
+                game.Cards.Clear();
+            }
+
+            var deck = new List<Card>();
+            var random = new Random();
+            var usedValues = new HashSet<int>();
+
+            // El número de parejas depende del nivel
+            for (int i = 0; i < game.Level; i++)
+            {
+                int value;
+                // Buscamos un valor único para la pareja
+                do { value = random.Next(1, 10000); } while (!usedValues.Add(value));
+
+                string image = $"img_{value}";
+
+                // Creamos el par de cartas como POCOs
+                deck.Add(new Card
+                {
+                    Value = value,
+                    ImgUrl = image,
+                    GameStateId = game.Id
+                });
+
+                deck.Add(new Card
+                {
+                    Value = value,
+                    ImgUrl = image,
+                    GameStateId = game.Id
+                });
+            }
+
+            // Barajamos la lista usando OrderBy con un nuevo GUID
+            var shuffledCards = deck.OrderBy(x => Guid.NewGuid()).ToList();
+
+            // Añadimos las cartas barajadas a la colección
+            foreach (var card in shuffledCards)
+            {
+                game.Cards.Add(card);
+            }
+        }
     }
 }

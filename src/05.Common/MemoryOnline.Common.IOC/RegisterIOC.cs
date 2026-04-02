@@ -14,10 +14,15 @@ namespace MemoryOnline.Common.IOC
         public static IServiceCollection AddDependencyInjectionForApplication(this IServiceCollection services)
         {
             // Repositorio y contexto EF Core InMemory
-            services.AddGenericRepositoryConfiguration();
+           // services.AddGenericRepositoryConfiguration();
+
+            // InMemory:
+            services.AddEFInMemory();
+
+
             //services.AddAppRepositoryInMemory();
             //services.AddAppRepositorySqlServer();
-            
+
             services.AddScoped<IJoinGameUseCase, JoinGameUseCase>();
             services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
             services.AddScoped<IUpdateStateUseCase, UpdateStateUseCase>();

@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using MemoryOnline.Domain.Entities;
 using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
-using MemoryOnline.Infraestructure.IRepository;
 
-namespace MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUsers
+namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetAllUsers
 {
   public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, List<Usuario>>
     {

@@ -14,6 +14,23 @@ namespace MemoryOnline.Infraestructure.Repository
         public virtual DbSet<Player> Player { get; set; }
         public virtual DbSet<Card> Card { get; set; }
 
-       
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configurar relaciones GameState -> Players
+            modelBuilder.Entity<GameState>()
+                .HasMany(g => g.Players)
+                .WithOne(p => p.GameState)
+                .HasForeignKey(p => p.GameStateId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configurar relaciones GameState -> Cards
+            modelBuilder.Entity<GameState>()
+                .HasMany(g => g.Cards)
+                .WithOne(c => c.GameState)
+                .HasForeignKey(c => c.GameStateId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

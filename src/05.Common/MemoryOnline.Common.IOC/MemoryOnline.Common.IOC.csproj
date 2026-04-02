@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\03.Application\MemoryOnline.Application.Application\MemoryOnline.Application.Application.csproj" />
+    <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.EF\MemoryOnline.Infraestructure.EF\MemoryOnline.Infraestructure.EF.csproj" />
     <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
   </ItemGroup>
 

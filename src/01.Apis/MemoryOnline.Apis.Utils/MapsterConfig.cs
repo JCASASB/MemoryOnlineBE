@@ -9,59 +9,32 @@ namespace MemoryOnline.Apis.Utils
     {
         public void Register(TypeAdapterConfig config)
         {
-            // 1. Mapeo Individual de Player (Usando su Builder)
+            // 1. Mapeo Individual de Player (POCO)
             config.NewConfig<PlayerDtoIn, Player>()
-                .ConstructUsing(src => new Player.Builder()
-                    .WithId(Guid.Parse(src.Id))
-                    .WithName(src.Name)
-                    .WithRemainMoves(src.RemainMoves)
-                    .WithTotalMoves(src.TotalMoves)
-                    .WithPoints(src.Points)
-                    .WithTurn(src.Turn)
-                    .Build());
+                .Map(dest => dest.Id, src => Guid.Parse(src.Id))
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.RemainMoves, src => src.RemainMoves)
+                .Map(dest => dest.TotalMoves, src => src.TotalMoves)
+                .Map(dest => dest.Points, src => src.Points)
+                .Map(dest => dest.Turn, src => src.Turn);
 
-            // 2. Mapeo Individual de Card (Usando su Builder)
+            // 2. Mapeo Individual de Card (POCO)
             config.NewConfig<CardDtoIn, Card>()
-                .ConstructUsing(src => new Card.Builder()
-                    .WithId(Guid.Parse(src.Id))
-                    .WithValue(src.Value)
-                    .WithImage(src.ImgUrl)
-                    .WithState(src.State)
-                    .Build());
+                .Map(dest => dest.Id, src => Guid.Parse(src.Id))
+                .Map(dest => dest.Value, src => src.Value)
+                .Map(dest => dest.ImgUrl, src => src.ImgUrl)
+                .Map(dest => dest.State, src => src.State);
 
-            // 3. Mapeo de GameState (El objeto principal)
+            // 3. Mapeo de GameState (POCO)
             config.NewConfig<GameStateDtoIn, GameState>()
-                .ConstructUsing(src => new GameState.Builder()
-                    .WithId(Guid.Parse(src.Id))
-                    .WithName(src.Name)
-                    .WithLevel(src.Level)
-                    .WithVersion(src.Version)
-                    .Build())
-                // ¡ESTO ES LO MÁS IMPORTANTE! 
-                // Evita que Mapster intente hacer: dest.Players = src.Players
-                .Ignore(dest => dest.Players)
-                .Ignore(dest => dest.Cards)
-                .AfterMapping((src, dest) =>
-                {
-                    // Limpiamos para evitar duplicados si el objeto ya existía
-                    dest.Players.Clear();
-                    dest.Cards.Clear();
+                .Map(dest => dest.Id, src => Guid.Parse(src.Id))
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.Level, src => src.Level)
+                .Map(dest => dest.Version, src => src.Version)
+                .Map(dest => dest.Players, src => src.Players)
+                .Map(dest => dest.Cards, src => src.Cards);
 
-                    // Usamos Adapt para que Mapster aplique las reglas 1 y 2 que definimos arriba
-                    if (src.Players != null)
-                    {
-                        var players = src.Players.Adapt<List<Player>>();
-                        foreach (var p in players) dest.AddPlayer(p);
-                    }
-
-                    if (src.Cards != null)
-                    {
-                        var cards = src.Cards.Adapt<List<Card>>();
-                        foreach (var c in cards) dest.AddCard(c);
-                    }
-                });
-
-            // --- DOMINIO -> DTO OUT (Solo lectura, es más sencillo) ---
+            // --- DOMINIO -> DTO OUT (Solo lectura) ---
             // --- MAPEO DE PLAYER (Dominio -> DTO Out) ---
             config.NewConfig<Player, PlayerDtoOut>()
                 .Map(dest => dest.id, src => src.Id.ToString())
@@ -75,7 +48,7 @@ namespace MemoryOnline.Apis.Utils
             config.NewConfig<Card, CardDtoOut>()
                 .Map(dest => dest.id, src => src.Id.ToString())
                 .Map(dest => dest.value, src => src.Value.ToString())
-                .Map(dest => dest.imgUrl, src => src.ImgUrl) // <-- Revisa si en Card es 'ImgUrl' o 'Image'
+                .Map(dest => dest.imgUrl, src => src.ImgUrl)
                 .Map(dest => dest.state, src => src.State);
 
             // --- MAPEO DE GAMESTATE (Dominio -> DTO Out) ---
@@ -83,15 +56,9 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.id, src => src.Id.ToString())
                 .Map(dest => dest.name, src => src.Name)
                 .Map(dest => dest.level, src => src.Level)
-                .Map(dest => dest.isProcessing, src => src.IsProcessing)
                 .Map(dest => dest.version, src => src.Version)
-                // Al tener configurados Player y Card arriba, estas listas ya no saldrán null
                 .Map(dest => dest.cards, src => src.Cards)
                 .Map(dest => dest.players, src => src.Players);
-
-
-
         }
-
     }
 }

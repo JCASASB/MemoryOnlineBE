@@ -7,22 +7,25 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
     {
         public GameState Execute(string playerName, string gameName, Guid gameId, int level)
         {
-            // El Builder de Player debería ocultar detalles técnicos como Moves = 0
-            var player = new Player.Builder()
-                .WithId(Guid.NewGuid())
-                .WithName(playerName)
-                // .WithPoints(0) -> Esto debería ser el default en el Builder
-                .Build();
+            // Crear el juego como POCO
+            var game = new GameState
+            {
+                Id = gameId,
+                Name = gameName,
+                Level = level,
+                Version = 0
+            };
 
-            var game = new GameState.Builder()
-                .WithId(gameId)
-                .WithName(gameName)
-                .WithLevel(level)
-                // .WithIsProcessing(false) -> Default en el Builder
-                .Build();
+            // Crear el primer jugador
+            var player = new Player
+            {
+                Name = playerName,
+                GameStateId = game.Id,
+                Turn = true // El primer jugador empieza
+            };
 
-            // 1. Asociamos el jugador (EF detectará la relación automáticamente)
-            game.AddPlayer(player);
+            // Asociar el jugador al juego
+            game.Players.Add(player);
 
             return game;
         }

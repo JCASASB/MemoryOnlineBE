@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Elementos de la solución/">
+    <File Path="Readme.txt" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/01.Apis/">
     <Project Path="src/01.Apis/Hispalance.Presentation.Extensions/Hispalance.Presentation.Extensions.csproj" Id="342f3b35-b7a0-4a36-bc70-104eb0247c00" />
@@ -12,8 +15,10 @@
   </Folder>
   <Folder Name="/src/03.Application/">
     <Project Path="src/03.Application/MemoryOnline.Application.Application/MemoryOnline.Application.Application.csproj" />
+    <Project Path="src/03.Application/MemoryOnline.Application.Users/MemoryOnline.Application.Users.csproj" Id="5cea042d-6826-4362-a0d7-eb3d0f0f4145" />
   </Folder>
   <Folder Name="/src/04.Infraestructure/">
+    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF.csproj" Id="ef64018d-f418-415d-b98e-b273062ba3bb" />
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Generic/MemoryOnline.Infraestructure.Generic.csproj" />
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Repository/MemoryOnline.Infraestructure.IRepository.csproj" Id="fce085b7-9b5c-4690-b698-b69409988287" />
   </Folder>

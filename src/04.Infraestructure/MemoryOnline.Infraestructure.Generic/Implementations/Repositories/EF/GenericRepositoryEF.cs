@@ -21,13 +21,20 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
 
         public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<TEntity> query = _dbSet;
 
             if (includes != null)
             {
                 foreach (var include in includes)
                 {
-                    query = query.Include(include);
+                    // Extraer el nombre de la propiedad eliminando el nodo Convert
+                    // que el compilador añade al castear a object
+                    var body = include.Body;
+                    if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+                        body = unary.Operand;
+
+                    if (body is MemberExpression member)
+                        query = query.Include(member.Member.Name);
                 }
             }
 
@@ -39,7 +46,7 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
             params Expression<Func<TEntity, object>>[] includes)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<TEntity> query = _dbSet; // Sin AsNoTracking para debug
 
             if (filter != null)
             {
@@ -50,7 +57,12 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
             {
                 foreach (var include in includes)
                 {
-                    query = query.Include(include);
+                    var body = include.Body;
+                    if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+                        body = unary.Operand;
+
+                    if (body is MemberExpression member)
+                        query = query.Include(member.Member.Name);
                 }
             }
 
@@ -85,14 +97,19 @@ namespace MemoryOnline.Infraestructure.Generic.Repositories.EF
 
         public async Task<TEntity> UpdateAsync(TEntity entityToUpdate)
         {
-            var existingEntity = _dbSet.Local.FirstOrDefault(e => e == entityToUpdate);
+            var context = (DbContext)_context;
+            var entry = context.Entry(entityToUpdate);
 
-            if (existingEntity == null)
+            if (entry.State == EntityState.Detached)
             {
                 _dbSet.Attach(entityToUpdate);
             }
 
-            ((DbContext)_context).Entry(entityToUpdate).State = EntityState.Modified;
+            // Usar DetectChanges para que EF Core detecte nuevas entidades
+            // en las propiedades de navegación (Players, Cards, etc.)
+            context.ChangeTracker.DetectChanges();
+            entry.State = EntityState.Modified;
+
             await SaveChangesAsync();
             return entityToUpdate;
         }

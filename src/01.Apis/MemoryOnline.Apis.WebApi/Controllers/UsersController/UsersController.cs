@@ -1,7 +1,7 @@
 using MediatR;
-using MemoryOnline.Application.Application.UsersApplication.Commands.Create;
-using MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUsers;
-using MemoryOnline.Application.Application.UsersApplication.Queries.GetUser;
+using MemoryOnline.Application.Users.UsersApplication.Commands.Create;
+using MemoryOnline.Application.Users.UsersApplication.Queries.GetAllUsers;
+using MemoryOnline.Application.Users.UsersApplication.Queries.GetUser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

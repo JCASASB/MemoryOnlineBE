@@ -1,6 +1,6 @@
 using Hispalance.Presentation.Extensions.AutoriAuthori;
 using Hispalance.Presentation.Extensions.OpenApiScalarExt;
-using MemoryOnline.Application.Application.UsersApplication.Queries.GetAllUsers;
+using MemoryOnline.Application.Users.UsersApplication.Queries.GetAllUsers;
 using MemoryOnline.Common.IOC;
 
 var builder = WebApplication.CreateBuilder(args);

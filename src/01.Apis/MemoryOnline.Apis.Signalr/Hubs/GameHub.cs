@@ -44,7 +44,12 @@ namespace MemoryOnline.Apis.Signalr.Hubs
                 string clientGroupId = newGame.Id.ToString();
                 await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
-                await ResponseGameState(clientGroupId, newGame);
+                var dtoGameState = _mapper.Map<GameStateDtoOut>(newGame);
+                var json = JsonConvert.SerializeObject(dtoGameState);
+
+                var groupClients = Clients.Group(clientGroupId);
+                await groupClients.SendAsync("SetInitialState", json);
+                await groupClients.SendAsync("LogFromServer", json);
             }
             catch (Exception ex)
             {
@@ -68,7 +73,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
 
                 string clientGroupId = domObj.Id.ToString();
 
-                await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
+              //  await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
                 await Clients.Group(clientGroupId).SendAsync("LogFromServer", "Se ha creado correctamente");
             }
@@ -81,7 +86,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         {
             var domObj = _mapper.Map<GameState>(updatedGame);
 
-            await _mediator.Send(new UpdateGameStateCommand(domObj));
+          //  await _mediator.Send(new UpdateGameStateCommand(domObj));
 
             var clientGroupId = domObj.Id.ToString();
             await ResponseGameState(clientGroupId, domObj);    
