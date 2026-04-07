@@ -2,7 +2,7 @@
 namespace MemoryOnline.Domain.Entities.Game
 {
     /// <summary>
-    /// POCO Entity - Representa un jugador en el juego
+    /// POCO Entity 
     /// </summary>
     public class Player
     {

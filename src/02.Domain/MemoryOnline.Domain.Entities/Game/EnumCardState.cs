@@ -1,7 +1,7 @@
 ﻿
 namespace MemoryOnline.Domain.Entities.Game
 {
-    public enum CardState
+    public enum EnumCardState
     {
         FaceDown = 0,
         FaceUp = 1,

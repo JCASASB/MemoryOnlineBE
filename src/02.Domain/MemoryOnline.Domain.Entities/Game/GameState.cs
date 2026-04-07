@@ -2,7 +2,7 @@
 namespace MemoryOnline.Domain.Entities.Game
 {
     /// <summary>
-    /// POCO Entity - Representa el estado de un juego de Memory
+    /// POCO Entity
     /// </summary>
     public class GameState
     {

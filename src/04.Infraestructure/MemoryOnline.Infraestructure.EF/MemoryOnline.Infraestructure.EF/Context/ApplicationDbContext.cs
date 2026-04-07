@@ -1,8 +1,5 @@
-using MemoryOnline.Domain.Entities;
 using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace MemoryOnline.Infraestructure.EF.Context
 {

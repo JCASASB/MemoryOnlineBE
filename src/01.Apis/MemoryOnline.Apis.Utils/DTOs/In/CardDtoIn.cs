@@ -7,6 +7,6 @@ namespace MemoryOnline.Apis.Utils.DTOs.In
         public string Id { get; set; }
         public int Value { get; set; }
         public string ImgUrl { get; set; }
-        public CardState State { get; set; }
+        public EnumCardState State { get; set; }
     }
 }
