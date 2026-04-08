@@ -25,6 +25,11 @@
   <Folder Name="/src/05.Common/">
     <Project Path="src/05.Common/MemoryOnline.Common.IOC/MemoryOnline.Common.IOC.csproj" />
   </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/04.Infraestructure/">
+    <Project Path="tests/04.Infraestructure/MemoryOnline.Infraestructure.EFTests/MemoryOnline.Infraestructure.EFTests.csproj" Id="8163c802-f9cb-4e78-8b05-b10f17288edb" />
+    <Project Path="tests/04.Infraestructure/MemoryOnline.Infraestructure.GenericTests/MemoryOnline.Infraestructure.GenericTests.csproj" Id="b0dfd3e2-9855-450c-a468-c180e6e599a5" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>

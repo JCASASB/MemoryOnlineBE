@@ -17,7 +17,7 @@ namespace MemoryOnline.Infraestructure.Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+ /*
             // Configurar relaciones GameState -> Players
             modelBuilder.Entity<GameState>()
                 .HasMany(g => g.Players)
@@ -30,7 +30,7 @@ namespace MemoryOnline.Infraestructure.Repository
                 .HasMany(g => g.Cards)
                 .WithOne(c => c.GameState)
                 .HasForeignKey(c => c.GameStateId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);*/
         }
     }
 }

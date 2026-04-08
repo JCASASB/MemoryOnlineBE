@@ -21,7 +21,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.JoinGam
 
         public async Task<GameState> Handle(JoinGameCommand request, CancellationToken cancellationToken)
         {
-            var boards = _gameRepository.GetGameByNameAsync(request.gameName);
+            var boards = await _gameRepository.GetGameByNameAsync(request.gameName);
             var board = boards.FirstOrDefault();
 
             if (board == null)
@@ -31,7 +31,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.JoinGam
 
             board = _joinGameUseCase.Execute(board, request.playerName);
 
-            _gameRepository.UpdateAsync(board);
+            await _gameRepository.UpdateAsync(board);
 
             return board;
         }

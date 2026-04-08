@@ -12,11 +12,11 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
             // Crear el nuevo jugador como POCO
             var player = new Player
             {
+                Id = Guid.NewGuid(),
                 Name = playerName,
                 RemainMoves = 2,
                 TotalMoves = 0,
                 Points = 0,
-                GameStateId = game.Id,
                 Turn = countPlayers == 1 // El segundo jugador es quien inicia
             };
 
@@ -62,16 +62,16 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
                 // Creamos el par de cartas como POCOs
                 deck.Add(new Card
                 {
+                    Id= Guid.NewGuid(),
                     Value = value,
                     ImgUrl = image,
-                    GameStateId = game.Id
                 });
 
                 deck.Add(new Card
                 {
+                    Id= Guid.NewGuid(),
                     Value = value,
                     ImgUrl = image,
-                    GameStateId = game.Id
                 });
             }
 

@@ -16,16 +16,16 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.UpdateG
 
         public async Task Handle(UpdateGameStateCommand request, CancellationToken cancellationToken)
         {
-            var boards = _gameRepository.GetAllAsync();
+            var boards = await _gameRepository.GetAllAsync();
             var board = boards.FirstOrDefault(g => g.Name == request.gameState.Name);
 
             if (board == null)
             {
-                _gameRepository.AddAsync(request.gameState);
+                await _gameRepository.AddAsync(request.gameState);
             }
             else
             {
-                _gameRepository.UpdateAsync(request.gameState);
+                await _gameRepository.UpdateAsync(request.gameState);
             }
         }
     }

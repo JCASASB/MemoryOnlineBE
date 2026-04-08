@@ -22,7 +22,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateG
         public async Task Handle(CreateGameCommand request, CancellationToken cancellationToken)
         {
             var game = _createGameUseCase.Execute(request.PlayerName, request.GameName, request.GameId, request.Level);
-            _gameRepository.AddAsync(game);
+            await _gameRepository.AddAsync(game);
         }
     }
 }

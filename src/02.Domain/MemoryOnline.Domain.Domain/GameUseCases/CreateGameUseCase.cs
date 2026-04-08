@@ -13,14 +13,16 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
                 Id = gameId,
                 Name = gameName,
                 Level = level,
-                Version = 0
+                Version = 0,
+                Players = new List<Player>(),
+                Cards = new List<Card>()
             };
 
-            // Crear el primer jugador
+            // Crear el primer jugador con Id
             var player = new Player
             {
+                Id = Guid.NewGuid(),
                 Name = playerName,
-                GameStateId = game.Id,
                 Turn = true // El primer jugador empieza
             };
 

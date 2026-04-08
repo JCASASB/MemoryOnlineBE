@@ -1,12 +1,11 @@
-﻿using MemoryOnline.Domain.Entities;
-using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Infraestructure.Generic;
+﻿using MemoryOnline.Domain.Entities.Game;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MemoryOnline.Infraestructure.IRepository
 {
-
+    public interface IApplicationDbContext
+    {
+        DbSet<GameState> Games { get; set; }
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    }
 }

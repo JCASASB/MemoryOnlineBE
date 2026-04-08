@@ -16,7 +16,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Queries
 
         public async Task<GameState> Handle(GetGameStateQuery request, CancellationToken cancellationToken)
         {
-            var games = _gameRepository.GetAllAsync();
+            var games = await _gameRepository.GetAllAsync();
             return games.Where(g => g.Name == request.gameName).First();
         }
     }

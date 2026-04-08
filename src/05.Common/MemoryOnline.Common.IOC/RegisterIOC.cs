@@ -17,7 +17,8 @@ namespace MemoryOnline.Common.IOC
            // services.AddGenericRepositoryConfiguration();
 
             // InMemory:
-            services.AddEFInMemory();
+            //services.AddEFInMemory();
+            services.AddEFMongoDB("");
 
 
             //services.AddAppRepositoryInMemory();
