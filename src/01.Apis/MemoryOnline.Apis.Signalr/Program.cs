@@ -3,6 +3,7 @@ using MemoryOnline.Apis.Signalr.Hubs;
 using MemoryOnline.Apis.Utils;
 using MemoryOnline.Application.Application.GameAppplication.Commands.JoinGame;
 using MemoryOnline.Common.IOC;
+using MemoryOnline.Infraestructure.EF.Context;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json.Serialization;
 
@@ -45,6 +46,13 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddMapsterConfig();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContextSqlServer>();
+    // Esto crea la base de datos SI NO EXISTE basándose en tus modelos
+    context.Database.EnsureCreated();
+}
 
 // SignalR hubs
 app.UseCors();

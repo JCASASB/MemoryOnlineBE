@@ -2,16 +2,17 @@ using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver.Core.Configuration;
 
 namespace MemoryOnline.Infraestructure.EF.Context
 {
-    public class ApplicationDbContextInMemory : DbContext, IApplicationDbContext
+    public class ApplicationDbContextSqlServer : DbContext, IApplicationDbContext
     {
-        public ApplicationDbContextInMemory()
+        public ApplicationDbContextSqlServer()
         {
         }
 
-        public ApplicationDbContextInMemory(DbContextOptions<ApplicationDbContextInMemory> options) : base(options)
+        public ApplicationDbContextSqlServer(DbContextOptions<ApplicationDbContextSqlServer> options) : base(options)
         {
         }
 
@@ -29,7 +30,7 @@ namespace MemoryOnline.Infraestructure.EF.Context
                 // 3. Proporciona excepciones mucho más detalladas si falla la lectura de datos
                 .EnableDetailedErrors();
 
-                optionsBuilder.UseInMemoryDatabase("TuCadenaDeConexion");
+                optionsBuilder.UseSqlServer("Server=127.0.0.1,1433;Database=GameDb;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True;");
             }
         }
 
@@ -41,17 +42,8 @@ namespace MemoryOnline.Infraestructure.EF.Context
             {
                 entity.HasKey(g => g.Id);
 
-                entity.OwnsMany(g => g.Players, p =>
-                {
-                    p.WithOwner().HasForeignKey("GameId");
-                    p.HasKey(x => x.Id); // Usa la propiedad real de la clase
-                });
-
-                entity.OwnsMany(g => g.Cards, c =>
-                {
-                    c.WithOwner().HasForeignKey("GameId");
-                    c.HasKey(x => x.Id); // Usa la propiedad real de la clase
-                });
+                entity.OwnsMany(g => g.Players, p => { p.ToJson(); });
+                entity.OwnsMany(g => g.Cards, c => { c.ToJson(); });
             });
         }
 

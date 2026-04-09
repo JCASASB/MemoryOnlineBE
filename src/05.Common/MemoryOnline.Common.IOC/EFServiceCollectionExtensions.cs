@@ -28,13 +28,12 @@ namespace MemoryOnline.Common.IOC
         /// <summary>
         /// Registra ApplicationDbContext con SQL Server y IGameRepository
         /// </summary>
-        public static IServiceCollection AddEFSqlServer(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddEFSqlServer(this IServiceCollection services)
         {
             services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContextInMemory>());
+                provider.GetRequiredService<ApplicationDbContextSqlServer>());
 
-            services.AddDbContext<ApplicationDbContextInMemory>(options =>
-                options.UseSqlServer(connectionString));
+            services.AddDbContext<ApplicationDbContextSqlServer>();
 
             services.AddScoped<IGameRepository, GameRepositoryEF>();
 
