@@ -1,7 +1,6 @@
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Context
 {
@@ -31,18 +30,10 @@ namespace MemoryOnline.Infraestructure.EF.Context
 
             modelBuilder.Entity<GameState>(entity =>
             {
-                entity.ToCollection("games");
+                entity.HasKey(g => g.Id);
 
-                // Players and Cards are embedded documents
-                entity.OwnsMany(g => g.Players, p =>
-                {
-                    p.Property(x => x.Id).HasConversion<string>();
-                });
-
-                entity.OwnsMany(g => g.Cards, c =>
-                {
-                    c.Property(x => x.Id).HasConversion<string>();
-                });
+                entity.OwnsMany(g => g.Players, p => { p.ToJson(); });
+                entity.OwnsMany(g => g.Cards, c => { c.ToJson(); });
             });
         }
 

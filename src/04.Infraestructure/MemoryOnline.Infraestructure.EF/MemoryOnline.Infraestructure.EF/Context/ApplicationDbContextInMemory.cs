@@ -41,17 +41,8 @@ namespace MemoryOnline.Infraestructure.EF.Context
             {
                 entity.HasKey(g => g.Id);
 
-                entity.OwnsMany(g => g.Players, p =>
-                {
-                    p.WithOwner().HasForeignKey("GameId");
-                    p.HasKey(x => x.Id); // Usa la propiedad real de la clase
-                });
-
-                entity.OwnsMany(g => g.Cards, c =>
-                {
-                    c.WithOwner().HasForeignKey("GameId");
-                    c.HasKey(x => x.Id); // Usa la propiedad real de la clase
-                });
+                entity.OwnsMany(g => g.Players, p => { p.ToJson(); });
+                entity.OwnsMany(g => g.Cards, c => { c.ToJson(); });
             });
         }
 
