@@ -18,7 +18,7 @@ namespace MemoryOnline.Infraestructure.EF.Repositories
             // Owned entities (Players, Cards) are loaded automatically with OwnsMany
             var game = _context.Games.FirstOrDefault(g => g.Id == id);
 
-            return await Task.FromResult(game != null ? new List<GameState> { game } : []);
+            return await Task.FromResult(game != null ? new List    <GameState> { game } : []);
         }
 
         public async Task<IEnumerable<GameState>> GetGameByNameAsync(string gameName)
