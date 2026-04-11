@@ -3,5 +3,5 @@
     using MediatR;
     using MemoryOnline.Domain.Entities.Game;
 
-    public record JoinGameCommand(string playerName, string gameName) : IRequest<GameState>;
+    public record JoinMatchCommand(string playerName, string gameName) : IRequest<BoardState>;
 }

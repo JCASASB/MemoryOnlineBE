@@ -2,6 +2,8 @@
 
 using MemoryOnline.Domain.Domain.GameUseCases;
 using MemoryOnline.Domain.Domain.IGameUseCases;
+using MemoryOnline.Domain.Domain.IMatchUseCases;
+using MemoryOnline.Domain.Domain.MatchUseCases;
 using MemoryOnline.Infraestructure.IRepository;
 using MemoryOnline.Repository.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -25,9 +27,9 @@ namespace MemoryOnline.Common.IOC
             //services.AddAppRepositoryInMemory();
             //services.AddAppRepositorySqlServer();
 
-            services.AddScoped<IJoinGameUseCase, JoinGameUseCase>();
-            services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
-            services.AddScoped<IUpdateStateUseCase, UpdateStateUseCase>();
+            services.AddScoped<IJoinMatchUseCase, JoinMatchUseCase>();
+            services.AddScoped<ICreateMatchUseCase, CreateMatchUseCase>();
+            services.AddScoped<IAddNewStateUseCase, AddNewStateUseCase>();
 
             // Capa de aplicación
            // services.AddScoped<UsersApplication>();

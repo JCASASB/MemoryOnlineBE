@@ -1,13 +1,21 @@
 
 using MemoryOnline.Domain.Entities.Game;
+using System.Text.Json;
 
-namespace MemoryOnline.Domain.Domain.GameUseCases
+namespace MemoryOnline.Domain.Domain.MatchUseCases
 {
-    public class JoinGameUseCase : IJoinGameUseCase
+    public class JoinMatchUseCase : IJoinMatchUseCase
     {
-        public GameState Execute(GameState game, string playerName)
+        public BoardState Execute(Match match, string playerName)
         {
-            var countPlayers = game.Players.Count;
+            var state = match.States.Last();
+
+            var newState = JsonSerializer.Deserialize<BoardState>(JsonSerializer.Serialize(state));
+
+            // Generar un nuevo Id para el nuevo estado
+            newState.Id = Guid.NewGuid();
+
+            var countPlayers = newState.Players.Count;
 
             // Crear el nuevo jugador como POCO
             var player = new Player
@@ -20,21 +28,21 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
                 Turn = countPlayers == 1 // El segundo jugador es quien inicia
             };
 
-            game.Players.Add(player);
+
+            newState.Players.Add(player);
 
             // Inicializar cartas cuando se une el segundo jugador
             if (countPlayers == 1)
             {
-                InitializeCards(game, reinitialize: false);
+                InitializeCards(newState, reinitialize: false);
             }
 
-            // Incrementar versión
-            game.Version++;
+            newState.Version = newState.Version+1;
 
-            return game;
+            return newState;
         }
 
-        private void InitializeCards(GameState game, bool reinitialize = false)
+        private void InitializeCards(BoardState game, bool reinitialize = false)
         {
             // Solo inicializar si no hay cartas o si se solicita explícitamente reinicializar
             if (game.Cards.Count > 0 && !reinitialize)

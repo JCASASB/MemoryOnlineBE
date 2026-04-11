@@ -12,7 +12,7 @@ namespace MemoryOnline.Infraestructure.EFTests;
 public class GameRepositoryInMemoryTests : IDisposable
 {
     private readonly ApplicationDbContextInMemory _context;
-    private readonly IGameRepository _repository;
+    private readonly IMatchRepository _repository;
     private readonly ServiceProvider _serviceProvider;
 
     public GameRepositoryInMemoryTests()
@@ -24,7 +24,7 @@ public class GameRepositoryInMemoryTests : IDisposable
         _serviceProvider = services.BuildServiceProvider();
 
         _context = _serviceProvider.GetRequiredService<ApplicationDbContextInMemory>();
-        _repository = _serviceProvider.GetRequiredService<IGameRepository>();
+        _repository = _serviceProvider.GetRequiredService<IMatchRepository>();
     }
 
     public void Dispose()
@@ -185,7 +185,7 @@ public class GameRepositoryInMemoryTests : IDisposable
         _context.SaveChanges();
         _context.Entry(game).State = EntityState.Detached;
 
-        var updatedGame = new GameState
+        var updatedGame = new BoardState
         {
             Id = game.Id,
             Name = "UpdatedName",
@@ -231,9 +231,9 @@ public class GameRepositoryInMemoryTests : IDisposable
         Assert.Null(exception);
     }
 
-    private static GameState CreateTestGame(string name = "TestGame")
+    private static BoardState CreateTestGame(string name = "TestGame")
     {
-        return new GameState
+        return new BoardState
         {
             Id = Guid.NewGuid(),
             Name = name,

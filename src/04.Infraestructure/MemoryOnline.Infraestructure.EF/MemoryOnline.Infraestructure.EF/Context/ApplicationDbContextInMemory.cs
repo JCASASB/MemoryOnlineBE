@@ -15,7 +15,7 @@ namespace MemoryOnline.Infraestructure.EF.Context
         {
         }
 
-        public DbSet<GameState> Games { get; set; }
+        public DbSet<Match> Matches { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -37,7 +37,7 @@ namespace MemoryOnline.Infraestructure.EF.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<GameState>(entity =>
+            modelBuilder.Entity<BoardState>(entity =>
             {
                 entity.HasKey(g => g.Id);
 

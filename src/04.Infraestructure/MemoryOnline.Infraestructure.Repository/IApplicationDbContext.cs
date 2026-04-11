@@ -5,7 +5,8 @@ namespace MemoryOnline.Infraestructure.IRepository
 {
     public interface IApplicationDbContext
     {
-        DbSet<GameState> Games { get; set; }
+        DbSet<Match> Matches { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

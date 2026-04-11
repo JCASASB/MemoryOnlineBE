@@ -10,7 +10,7 @@ namespace MemoryOnline.Infraestructure.Repository
     public class MyDbContext(DbContextOptions options, IConfiguration config) : DBContextInMemory(options, config) , IMyDbContext
     {
         public virtual DbSet<Usuario> Usuario { get; set; }
-        public virtual DbSet<GameState> Games { get; set; }
+        public virtual DbSet<BoardState> Games { get; set; }
         public virtual DbSet<Player> Player { get; set; }
         public virtual DbSet<Card> Card { get; set; }
 

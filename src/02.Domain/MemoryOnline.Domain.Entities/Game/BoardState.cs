@@ -7,9 +7,8 @@ namespace MemoryOnline.Domain.Entities.Game
     /// <summary>
     /// POCO Entity for MongoDB - Players and Cards are embedded documents
     /// </summary>
-    public class GameState
+    public class BoardState
     {
-        [BsonId]
         [BsonRepresentation(BsonType.String)]
         public Guid Id { get; set; }
 

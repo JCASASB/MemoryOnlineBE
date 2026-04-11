@@ -2,8 +2,8 @@ using MemoryOnline.Domain.Entities.Game;
 
 namespace MemoryOnline.Domain.Domain.IGameUseCases
 {
-    public interface IUpdateStateUseCase
+    public interface IAddNewStateUseCase
     {
-        GameState Execute(GameState game);
+        Match Execute(Match match, BoardState newState);
     }
 }

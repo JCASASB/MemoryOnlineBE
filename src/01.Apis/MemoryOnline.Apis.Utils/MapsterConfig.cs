@@ -26,7 +26,7 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.State, src => src.State);
 
             // 3. Mapeo de GameState (POCO)
-            config.NewConfig<GameStateDtoIn, GameState>()
+            config.NewConfig<GameStateDtoIn, BoardState>()
                 .Map(dest => dest.Id, src => Guid.Parse(src.Id))
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Level, src => src.Level)
@@ -52,7 +52,7 @@ namespace MemoryOnline.Apis.Utils
                 .Map(dest => dest.state, src => src.State);
 
             // --- MAPEO DE GAMESTATE (Dominio -> DTO Out) ---
-            config.NewConfig<GameState, GameStateDtoOut>()
+            config.NewConfig<BoardState, GameStateDtoOut>()
                 .Map(dest => dest.id, src => src.Id.ToString())
                 .Map(dest => dest.name, src => src.Name)
                 .Map(dest => dest.level, src => src.Level)

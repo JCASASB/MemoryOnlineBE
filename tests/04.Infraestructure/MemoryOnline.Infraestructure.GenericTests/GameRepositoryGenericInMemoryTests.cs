@@ -12,7 +12,7 @@ namespace MemoryOnline.Infraestructure.GenericTests
     public class GameRepositoryGenericInMemoryTests
     {
         private readonly MyDbContext _context;
-        private readonly IGameRepository _repository;
+        private readonly IMatchRepository _repository;
 
         public GameRepositoryGenericInMemoryTests()
         {
@@ -182,7 +182,7 @@ namespace MemoryOnline.Infraestructure.GenericTests
             _context.SaveChanges();
             _context.Entry(game).State = EntityState.Detached;
 
-            var updatedGame = new GameState
+            var updatedGame = new BoardState
             {
                 Id = game.Id,
                 Name = "UpdatedName",
@@ -228,9 +228,9 @@ namespace MemoryOnline.Infraestructure.GenericTests
             Assert.Null(exception);
         }
 
-        private static GameState CreateTestGame(string name = "TestGame")
+        private static BoardState CreateTestGame(string name = "TestGame")
         {
-            return new GameState
+            return new BoardState
             {
                 Id = Guid.NewGuid(),
                 Name = name,

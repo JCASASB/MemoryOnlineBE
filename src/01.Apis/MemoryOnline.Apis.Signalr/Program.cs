@@ -39,7 +39,7 @@ builder.Services.AddDependencyInjectionForApplication();
 // Registrar MediatR y handlers
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssemblyContaining<JoinGameHandler>();
+    cfg.RegisterServicesFromAssemblyContaining<JoinMatchHandler>();
 });
 
 // Registrar configuración de Mapster, mapeo de dtos

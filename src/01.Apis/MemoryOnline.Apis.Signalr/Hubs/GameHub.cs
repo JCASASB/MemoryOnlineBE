@@ -2,6 +2,7 @@ using MapsterMapper;
 using MediatR;
 using MemoryOnline.Apis.Utils.DTOs.In;
 using MemoryOnline.Apis.Utils.DTOs.Out;
+using MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch;
 using MemoryOnline.Application.Application.GameAppplication.Commands.JoinGame;
 using MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState;
 using MemoryOnline.Application.Application.GameAppplication.Queries;
@@ -25,7 +26,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             _mapper = mapper;
         }
       
-        private async Task ResponseGameState(string clientGroupId, GameState newGame)
+        private async Task ResponseGameState(string clientGroupId, BoardState newGame)
         {
             var dtoGameState = _mapper.Map<GameStateDtoOut>(newGame);
             var json = JsonConvert.SerializeObject(dtoGameState);
@@ -39,9 +40,11 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         {
             try
             {
-                var newGame = await _mediator.Send(new JoinGameCommand(playerName, gameName));
+                var newGame = await _mediator.Send(new JoinMatchCommand(playerName, gameName));
 
-                string clientGroupId = newGame.Id.ToString();
+                var id = await _mediator.Send(new GetMatchIdFromNameQuery(gameName));
+
+                string clientGroupId = id.ToString();
                 await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
                 var dtoGameState = _mapper.Map<GameStateDtoOut>(newGame);
@@ -67,15 +70,13 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         {
             try
             {
-                var domObj = _mapper.Map<GameState>(updatedGame);
+                var boardState = _mapper.Map<BoardState>(updatedGame);
 
-                await _mediator.Send(new UpdateGameStateCommand(domObj));
+                await _mediator.Send(new CreateMatchCommand(boardState, boardState.Id));
 
-                string clientGroupId = domObj.Id.ToString();
+                var id = await _mediator.Send(new GetMatchIdFromNameQuery(boardState.Name));
 
-              //  await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
-
-                await Clients.Group(clientGroupId).SendAsync("LogFromServer", "Se ha creado correctamente");
+                await Clients.Caller.SendAsync("LogFromServer", "Match creado");
             }
             catch (Exception ex)
             {
@@ -84,17 +85,52 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         }
         public async Task UpdateGameState(GameStateDtoIn updatedGame)
         {
-            var domObj = _mapper.Map<GameState>(updatedGame);
+            var domObj = _mapper.Map<BoardState>(updatedGame);
 
-          //  await _mediator.Send(new UpdateGameStateCommand(domObj));
+            await _mediator.Send(new AddNewStateCommand(domObj, domObj.Id));
 
-            var clientGroupId = domObj.Id.ToString();
+            var id = await _mediator.Send(new GetMatchIdFromNameQuery(domObj.Name));
+            string clientGroupId = id.ToString();
+
             await ResponseGameState(clientGroupId, domObj);    
         }
 
         public async Task GetGameState(string gameName)
         {
             var newGame = await _mediator.Send(new GetGameStateQuery(gameName));
+        }
+
+        public async Task GetMatchIdFromName(string gameName)
+        {
+            try
+            {
+                var id = await _mediator.Send(new GetMatchIdFromNameQuery(gameName));
+                string clientGroupId = id.ToString();
+
+                await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
+
+                var groupClients = Clients.Group(clientGroupId);
+
+                await groupClients.SendAsync("SetMatchId", id);
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
+        }
+
+        public async Task GetStatesFromVersion(Guid gameId, int version)
+        {
+            try
+            {
+                var boardStates = await _mediator.Send(new GetBoardStatesFromVersionQuery(gameId, version));
+
+                await Clients.Caller.SendAsync("SetStatesFromVersion", boardStates.ToArray());
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("Error", ex.Message);
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)

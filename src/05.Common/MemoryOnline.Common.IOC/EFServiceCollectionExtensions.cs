@@ -20,7 +20,7 @@ namespace MemoryOnline.Common.IOC
 
             services.AddDbContext<ApplicationDbContextInMemory>();
 
-            services.AddScoped<IGameRepository, GameRepositoryEF>();
+            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
             return services;
         }
@@ -35,7 +35,7 @@ namespace MemoryOnline.Common.IOC
 
             services.AddDbContext<ApplicationDbContextSqlServer>();
 
-            services.AddScoped<IGameRepository, GameRepositoryEF>();
+            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
             return services;
         }
@@ -47,7 +47,7 @@ namespace MemoryOnline.Common.IOC
 
             services.AddDbContext<ApplicationDbContextMongoDB>();
 
-            services.AddScoped<IGameRepository, GameRepositoryEF>();
+            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
             return services;
         }

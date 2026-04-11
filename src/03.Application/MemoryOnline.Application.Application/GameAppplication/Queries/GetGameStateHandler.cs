@@ -5,19 +5,18 @@ using MemoryOnline.Infraestructure.IRepository;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Queries
 {
-    public class GetGameStateHandler : IRequestHandler<GetGameStateQuery, GameState>
+    public class GetGameStateHandler : IRequestHandler<GetGameStateQuery, BoardState>
     {
-        private readonly IGameRepository _gameRepository;
+        private readonly IMatchRepository _gameRepository;
 
-        public GetGameStateHandler(IGameRepository gameRepository)
+        public GetGameStateHandler(IMatchRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }
 
-        public async Task<GameState> Handle(GetGameStateQuery request, CancellationToken cancellationToken)
+        public async Task<BoardState> Handle(GetGameStateQuery request, CancellationToken cancellationToken)
         {
-            var games = await _gameRepository.GetAllAsync();
-            return games.Where(g => g.Name == request.gameName).First();
+           throw new NotImplementedException();
         }
     }
 }

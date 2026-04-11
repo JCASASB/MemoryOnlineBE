@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace MemoryOnline.Domain.Entities.Game
 {
@@ -10,9 +8,10 @@ namespace MemoryOnline.Domain.Entities.Game
     /// </summary>
     public class Match
     {
+        [BsonId]
         [Key]
         public Guid Id { get; set; }
 
-        public string State { get; set; } = string.Empty;
+        public List<BoardState> States { get; set; }
     }
 }

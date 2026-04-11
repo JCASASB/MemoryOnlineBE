@@ -1,6 +1,8 @@
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Context
 {
@@ -14,7 +16,7 @@ namespace MemoryOnline.Infraestructure.EF.Context
         {
         }
 
-        public DbSet<GameState> Games { get; set; }
+        public DbSet<Match> Matches { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -28,12 +30,24 @@ namespace MemoryOnline.Infraestructure.EF.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<GameState>(entity =>
+            modelBuilder.Entity<Match>(entity =>
             {
-                entity.HasKey(g => g.Id);
+                entity.ToCollection("Matches");
+                entity.HasKey(m => m.Id);
 
-                entity.OwnsMany(g => g.Players, p => { p.ToJson(); });
-                entity.OwnsMany(g => g.Cards, c => { c.ToJson(); });
+                // CONFIGURACIÓ PER A MONGODB
+                entity.OwnsMany(m => m.States, state =>
+                {
+                    // 1. ELIMINA EL .HasKey(). En Mongo, els elements de la llista 
+                    // es tracten com a objectes sense identitat pròpia per a EF Core.
+
+                    // 2. Si vols que l'ID es guardi com a string o Guid normal:
+                    state.Property(s => s.Id).ValueGeneratedNever();
+
+                    // 3. Configurem els sub-nivells (també sense HasKey)
+                    state.OwnsMany(s => s.Cards);
+                    state.OwnsMany(s => s.Players);
+                });
             });
         }
 
