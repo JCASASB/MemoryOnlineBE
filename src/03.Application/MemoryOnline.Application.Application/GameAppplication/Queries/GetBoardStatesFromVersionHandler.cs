@@ -17,7 +17,7 @@ namespace MemoryOnline.Application.Application.GameAppplication.Queries
         {
             var allStates = await _matchRepository.GetAllBoardStatesAsync(request.mathId);
 
-            return allStates.Where(s=> s.Version > request.version).ToList();
+            return allStates.Where(s=> s.Version >= request.version).ToList();
         }
     }
 }

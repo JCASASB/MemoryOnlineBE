@@ -14,7 +14,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         private readonly ILogger<UsersController> _logger;
         private readonly IMediator _mediator;
 
-        public UsersController(ILogger<UsersController> logger
+        public UsersController(
+            ILogger<UsersController> logger
             , IMediator mediator)
         {
             _logger = logger;
