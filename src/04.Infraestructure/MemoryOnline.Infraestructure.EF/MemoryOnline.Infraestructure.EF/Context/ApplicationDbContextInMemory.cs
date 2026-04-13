@@ -5,17 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace MemoryOnline.Infraestructure.EF.Context
 {
-    public class ApplicationDbContextInMemory : DbContext, IApplicationDbContext
+    public class ApplicationDbContextInMemory : ApplicationDbContextBase, IApplicationDbContext
     {
-        public ApplicationDbContextInMemory()
-        {
-        }
-
         public ApplicationDbContextInMemory(DbContextOptions<ApplicationDbContextInMemory> options) : base(options)
         {
         }
-
-        public DbSet<Match> Matches { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,19 +25,6 @@ namespace MemoryOnline.Infraestructure.EF.Context
 
                 optionsBuilder.UseInMemoryDatabase("TuCadenaDeConexion");
             }
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<BoardState>(entity =>
-            {
-                entity.HasKey(g => g.Id);
-
-                entity.OwnsMany(g => g.Players, p => { p.ToJson(); });
-                entity.OwnsMany(g => g.Cards, c => { c.ToJson(); });
-            });
         }
 
         async Task<int> IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)

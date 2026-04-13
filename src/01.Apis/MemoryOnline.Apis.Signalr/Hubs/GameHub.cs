@@ -70,11 +70,16 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         {
             try
             {
+                Guid newMatchId = new Guid();
+
                 var boardState = _mapper.Map<BoardState>(updatedGame);
 
-                await _mediator.Send(new CreateMatchCommand(boardState, boardState.Id));
+                await _mediator.Send(new CreateMatchCommand(boardState, newMatchId));
 
                 var id = await _mediator.Send(new GetMatchIdFromNameQuery(boardState.Name));
+
+                string clientGroupId = id.ToString();
+                await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
 
                 await Clients.Caller.SendAsync("LogFromServer", "Match creado");
             }
@@ -107,11 +112,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
                 var id = await _mediator.Send(new GetMatchIdFromNameQuery(gameName));
                 string clientGroupId = id.ToString();
 
-                await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
-
-                var groupClients = Clients.Group(clientGroupId);
-
-                await groupClients.SendAsync("SetMatchId", id);
+                await Clients.Caller.SendAsync("SetMatchId", id);
             }
             catch (Exception ex)
             {
@@ -125,7 +126,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             {
                 var boardStates = await _mediator.Send(new GetBoardStatesFromVersionQuery(gameId, version));
 
-                await Clients.Caller.SendAsync("SetStatesFromVersion", boardStates.ToArray());
+                await Clients.Caller.SendAsync("UpdateStatesFromServer", boardStates.ToArray());
             }
             catch (Exception ex)
             {

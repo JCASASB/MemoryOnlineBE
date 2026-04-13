@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Users\" />
+  </ItemGroup>
+
 </Project>
