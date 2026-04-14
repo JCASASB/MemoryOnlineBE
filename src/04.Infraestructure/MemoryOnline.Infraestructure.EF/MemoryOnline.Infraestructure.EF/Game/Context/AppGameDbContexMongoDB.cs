@@ -1,14 +1,11 @@
-using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
-using MongoDB.EntityFrameworkCore.Extensions;
 
-namespace MemoryOnline.Infraestructure.EF.Context
+namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class ApplicationDbContextMongoDB : ApplicationDbContextBase, IApplicationDbContext
+    public class AppGameDbContexMongoDB : AppGameDbContextBase, IApplicationDbContext
     {
-        public ApplicationDbContextMongoDB(DbContextOptions<ApplicationDbContextMongoDB> options) : base(options)
+        public AppGameDbContexMongoDB(DbContextOptions<AppGameDbContexMongoDB> options) : base(options)
         {
         }
 

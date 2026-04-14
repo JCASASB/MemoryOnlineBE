@@ -2,7 +2,7 @@ using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 
-namespace MemoryOnline.Infraestructure.EF.Repositories
+namespace MemoryOnline.Infraestructure.EF.Game.Repositories
 {
     public class MatchRepositoryEF : IMatchRepository
     {
@@ -19,11 +19,6 @@ namespace MemoryOnline.Infraestructure.EF.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(BoardState game)
-        {
-            await _context.SaveChangesAsync();
-        }
-        
         public async Task<Match> GetMatchByNameAsync(string name)
         {
             var match = await _context.Matches

@@ -1,7 +1,6 @@
 ﻿using MemoryOnline.Domain.Entities;
-using MemoryOnline.Infraestructure.Generic.IRepositories.Generic;
 
-namespace MemoryOnline.Infraestructure.IRepository
+namespace MemoryOnline.Infraestructure.IRepository 
 {
     public interface IUsersRepository 
     {

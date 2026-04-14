@@ -1,5 +1,5 @@
-using MemoryOnline.Infraestructure.EF.Context;
-using MemoryOnline.Infraestructure.EF.Repositories;
+using MemoryOnline.Infraestructure.EF.Game.Context;
+using MemoryOnline.Infraestructure.EF.Game.Repositories;
 using MemoryOnline.Infraestructure.Generic;
 using MemoryOnline.Infraestructure.IRepository;
 using MemoryOnline.Infraestructure.Repository;
@@ -16,9 +16,9 @@ namespace MemoryOnline.Common.IOC
         public static IServiceCollection AddEFInMemory(this IServiceCollection services)
         {
             services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContextInMemory>());
+                provider.GetRequiredService<AppGameDbContextInMemory>());
 
-            services.AddDbContext<ApplicationDbContextInMemory>();
+            services.AddDbContext<AppGameDbContextInMemory>();
 
             services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
@@ -31,9 +31,9 @@ namespace MemoryOnline.Common.IOC
         public static IServiceCollection AddEFSqlServer(this IServiceCollection services)
         {
             services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContextSqlServer>());
+                provider.GetRequiredService<AppGameDbContextSqlServer>());
 
-            services.AddDbContext<ApplicationDbContextSqlServer>();
+            services.AddDbContext<AppGameDbContextSqlServer>();
 
             services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
@@ -43,9 +43,9 @@ namespace MemoryOnline.Common.IOC
         public static IServiceCollection AddEFMongoDB(this IServiceCollection services, string connectionString)
         {
             services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContextMongoDB>());
+                provider.GetRequiredService<AppGameDbContexMongoDB>());
 
-            services.AddDbContext<ApplicationDbContextMongoDB>();
+            services.AddDbContext<AppGameDbContexMongoDB>();
 
             services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 

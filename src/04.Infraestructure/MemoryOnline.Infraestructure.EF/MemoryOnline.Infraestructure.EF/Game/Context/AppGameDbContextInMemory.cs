@@ -1,12 +1,13 @@
+using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace MemoryOnline.Infraestructure.EF.Context
+namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class ApplicationDbContextSqlServer : ApplicationDbContextBase, IApplicationDbContext
+    public class AppGameDbContextInMemory : AppGameDbContextBase, IApplicationDbContext
     {
-        public ApplicationDbContextSqlServer(DbContextOptions<ApplicationDbContextSqlServer> options) : base(options)
+        public AppGameDbContextInMemory(DbContextOptions<AppGameDbContextInMemory> options) : base(options)
         {
         }
 
@@ -22,9 +23,10 @@ namespace MemoryOnline.Infraestructure.EF.Context
                 // 3. Proporciona excepciones mucho más detalladas si falla la lectura de datos
                 .EnableDetailedErrors();
 
-                optionsBuilder.UseSqlServer("Server=127.0.0.1,1433;Database=GameDb;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True;");
+                optionsBuilder.UseInMemoryDatabase("TuCadenaDeConexion");
             }
         }
+
         async Task<int> IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)
         {
             return await base.SaveChangesAsync(cancellationToken);

@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using MongoDB.EntityFrameworkCore.Extensions;
 
-namespace MemoryOnline.Infraestructure.EF.Context
+namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public abstract class ApplicationDbContextBase : DbContext
+    public abstract class AppGameDbContextBase : DbContext
     {
-        protected ApplicationDbContextBase(DbContextOptions options) : base(options)
+        protected AppGameDbContextBase(DbContextOptions options) : base(options)
         {
         }
 
