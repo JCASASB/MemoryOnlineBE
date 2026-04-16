@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Hispalance.Infraestructure.DB.DBContext
 {
-    public class DbContextSqlServer : DbContext, IMyDbContext
+    public class DBContextSqlServer : DBContextMyBase
     {
-        private string _connectionString;
-
-        public DbContextSqlServer(string connectionString)
+        public DBContextSqlServer(IConfiguration config) : base(config)
         {
-            _connectionString = connectionString;
+            _connectionString = "Server=127.0.0.1,1433;Database=TuBaseDeDatos;User Id=SA;Password=TuPasswordFuerte123!;TrustServerCertificate=True;\r\n";
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -18,8 +17,25 @@ namespace Hispalance.Infraestructure.DB.DBContext
             base.OnConfiguring(optionsBuilder);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected string GetConnectionString()
         {
+            try
+            {
+                var server = _config.GetSection("DBSection:Server").Value;
+                var port = _config.GetSection("DBSection:Port").Value;
+                var database = _config.GetSection("DBSection:Database").Value;
+                var user = _config.GetSection("DBSection:User").Value;
+                var pass = _config.GetSection("DBSection:Password").Value;
+                var connectionString = String.Format("Server={0},{1};Database={2};User Id={3};Password={4}",
+                    server, port, database, user, pass);
+
+                return connectionString;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Algo falla al recuperar los datos " +
+                    "de la conection string en el dbcontext", ex);
+            }
         }
     }
 }

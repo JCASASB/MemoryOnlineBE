@@ -18,8 +18,8 @@
     <Project Path="src/03.Application/MemoryOnline.Application.Users/MemoryOnline.Application.Users.csproj" Id="5cea042d-6826-4362-a0d7-eb3d0f0f4145" />
   </Folder>
   <Folder Name="/src/04.Infraestructure/">
+    <Project Path="src/04.Infraestructure/Hispalance.Infraestructure.DB_new/Hispalance.Infraestructure.DB.csproj" />
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF.csproj" Id="ef64018d-f418-415d-b98e-b273062ba3bb" />
-    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Generic/MemoryOnline.Infraestructure.Generic.csproj" />
     <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Repository/MemoryOnline.Infraestructure.IRepository.csproj" Id="fce085b7-9b5c-4690-b698-b69409988287" />
   </Folder>
   <Folder Name="/src/05.Common/">

@@ -1,12 +1,12 @@
-﻿using MemoryOnline.Domain.Entities;
+﻿using MemoryOnline.Domain.Domain.Specifications.Interfaces;
+using MemoryOnline.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace MemoryOnline.Infraestructure.IRepository 
 {
     public interface IUsersRepository 
     {
-        IEnumerable<Usuario> GetAll();
-        IEnumerable<Usuario> GetUserByName(string name);
-        void Add(Usuario entityToAdd);
-
+        Task<IEnumerable<Usuario>> GetWithFilter(ISpecification<Usuario> spec);
+        Task AddAsync(Usuario entityToAdd);
     }
 }

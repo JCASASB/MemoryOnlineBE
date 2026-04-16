@@ -2,16 +2,16 @@
 {
     public interface IGenericRepositoryWrite<TEntity> : IGenericBaseRepository<TEntity>
     {
-        void DeleteById(object id);
+     //   void DeleteById(object id);
 
-        void Delete(TEntity entityToDelete);
+      //  void Delete(TEntity entityToDelete);
 
         void Add(TEntity entityToAdd);
 
-        void Attach(TEntity entityToAttach);
+        //  void Attach(TEntity entityToAttach);
 
-        void Update(TEntity entityToUpdate);
+        //   void Update(TEntity entityToUpdate);
 
-        void SaveChanges();
+        Task<int> SaveChangesAsync();
     }
 }

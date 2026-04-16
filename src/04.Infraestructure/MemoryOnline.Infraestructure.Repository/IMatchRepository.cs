@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using MemoryOnline.Domain.Entities.Game;
+﻿using MemoryOnline.Domain.Entities.Game;
 
 namespace MemoryOnline.Infraestructure.IRepository
 {

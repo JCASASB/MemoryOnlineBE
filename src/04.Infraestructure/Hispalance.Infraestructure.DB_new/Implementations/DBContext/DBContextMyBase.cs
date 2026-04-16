@@ -21,12 +21,11 @@ namespace Hispalance.Infraestructure.DB.DBContext
         {
             try
             {
-                var server = _config.GetSection("DBSection:server").Value;
-                var port = _config.GetSection("DBSection:port").Value;
-                var database = _config.GetSection("DBSection:database").Value;
-                var user = _config.GetSection("DBSection:user").Value;
-                var pass = _config.GetSection("DBSection:pass").Value;
-
+                var server = _config.GetSection("DBSection:Server").Value;
+                var port = _config.GetSection("DBSection:Port").Value;
+                var database = _config.GetSection("DBSection:Database").Value;
+                var user = _config.GetSection("DBSection:User").Value;
+                var pass = _config.GetSection("DBSection:Password").Value;
                 var connectionString = String.Format("server={0};Port={1};database={2};uid={3};pwd={4}",
                     server, port, database, user, pass);
 

@@ -5,148 +5,62 @@ using System.Linq.Expressions;
 namespace Hispalance.Infraestructure.DB.Repositories.EF
 {
     /*
-     * Cada unit of work tiene una instancia de context injectada por DI, esta la inyecto a los repositorios de cada unit of work de forma manual. Mirar las implementaciones 
-     * de los constructores de unit of work
      * 
      * */
     public class GenericRepositoryEF<TEntity> : GenericRepositoryEFBase<TEntity>, IGenericRepository<TEntity> 
         where TEntity : class
     {
-        public GenericRepositoryEF(IMyDbContext context) : base(context)
+        public GenericRepositoryEF(DbContext context) : base(context)
         {
+        }
+
+        public void Add(TEntity entityToAdd)
+        {
+            _context.Add(entityToAdd);
         }
 
         #region public methods
 
-        public virtual IEnumerable<TEntity> GetAll(
-              Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-            )
+        public async Task<IEnumerable<TEntity>> GetAllAsync(
+            Expression<Func<TEntity, bool>> filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null)
         {
-            IQueryable<TEntity> query = _dbSet;
-
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                query = query.Include(includeProperty);
-            }
-
-            if (orderBy != null)
-            {
-                return orderBy(query);
-            }
-            else
-            {
-                return query;
-            }
+            return await _context.Set<TEntity>().ToListAsync();
         }
 
-        public virtual IEnumerable<TEntity> Get(
-              Expression<Func<TEntity, bool>> filter = null
-            , Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
-            )
+
+        // SOBRECARGA 2: La completa (con params)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(
+            Expression<Func<TEntity, bool>> filter,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy,
+            params Expression<Func<TEntity, object>>[] includeProperties)
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _context.Set<TEntity>().AsQueryable();
 
-
+            // Aplicar filtro (cláusula WHERE)
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            // Aplicar inclusiones (eager loading)
+            if (includeProperties != null)
             {
-                query = query.Include(includeProperty);
+                query = includeProperties.Aggregate(query, (current, include) => current.Include(include));
             }
 
-
+            // Aplicar ordenamiento
             if (orderBy != null)
             {
                 query = orderBy(query);
             }
-            else
-            {
-            }
 
-            return query;
+            return await query.ToListAsync();
         }
 
-        public TEntity GetById(object id)
+        public async Task<int> SaveChangesAsync()
         {
-            return _dbSet.Find(id);
-        }
-
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
-        {
-            //  AsNoTracking para que pueda hacer update sin error
-            return _dbSet.AsNoTracking().Where(predicate);
-        }
-
-       
-        public void Delete(TEntity entityToDelete)
-        {
-            _dbSet.Attach(entityToDelete);
-            _dbSet.Remove(entityToDelete);
-        }
-
-        public void DeleteById(object id)
-        {
-            TEntity entityToDelete = _dbSet.Find(id);
-            Delete(entityToDelete);
-        }
-
-        public void Add(TEntity entityToAdd)
-        {
-            _dbSet.Add(entityToAdd);
-        }
-
-        public void Attach(TEntity entityToAttach)
-        {
-            _dbSet.Attach(entityToAttach);
-        }
-        public void Dettach(TEntity entityToAttach)
-        {
-            ((DbContext)_context).Entry<TEntity>(entityToAttach).State = EntityState.Detached;
-        }
-
-        public void Update(TEntity entityToUpdate)
-        {
-            ((DbContext)_context).Entry<TEntity>(entityToUpdate).State = EntityState.Modified;
-        }
-
-        public IEnumerable<TEntity> GetPagedElements<TKey>(
-              int pageIndex
-            , int pageCount
-            , Expression<Func<TEntity, TKey>> orderByExpression
-            , bool ascending = true
-            )
-        {
-            if (pageIndex < 1)
-                pageIndex = 1;
-
-            if (orderByExpression == (Expression<Func<TEntity, TKey>>)null)
-                throw new ArgumentNullException();
-
-            return (ascending)
-                ?
-                   _dbSet.OrderBy(orderByExpression)
-                   .Skip((pageIndex - 1) * pageCount)
-                   .Take(pageCount)
-                   .ToList()
-                :
-                    _dbSet.OrderByDescending(orderByExpression)
-                    .Skip((pageIndex - 1) * pageCount)
-                    .Take(pageCount)
-                    .ToList();
-        }
-
-        public void SaveChanges()
-        {
-            _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
         #endregion

@@ -4,28 +4,19 @@ namespace Hispalance.Infraestructure.DB.IRepositories.Generic
 {
     public interface IGenericRepositoryRead<TEntity> : IGenericBaseRepository<TEntity>
     {
-        IEnumerable<TEntity> Get(
+        // Versión para consultas rápidas o sin relaciones
+        Task<IEnumerable<TEntity>> GetAllAsync(
             Expression<Func<TEntity, bool>> filter = null
             , Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
+                , IOrderedQueryable<TEntity>> orderBy = null
         );
 
-        IEnumerable<TEntity> GetAll(
-              Func<IQueryable<TEntity>
-            , IOrderedQueryable<TEntity>> orderBy = null
-            , string includeProperties = ""
+        // Versión que permite incluir propiedades relacionadas usando params
+        Task<IEnumerable<TEntity>> GetAllAsync(
+            Expression<Func<TEntity, bool>> filter,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy,
+            params Expression<Func<TEntity, object>>[] includeProperties
         );
-
-        TEntity GetById(object id);
-        IEnumerable<TEntity> GetPagedElements<TKey>(int pageIndex, int pageCount,
-           Expression<Func<TEntity, TKey>> orderByExpression, bool ascending = true);
-
-     
-
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-
-        
 
     }
 }

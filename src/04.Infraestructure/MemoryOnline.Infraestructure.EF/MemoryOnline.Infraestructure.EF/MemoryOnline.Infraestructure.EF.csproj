@@ -14,12 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
     <ProjectReference Include="..\..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
+    <ProjectReference Include="..\..\Hispalance.Infraestructure.DB_new\Hispalance.Infraestructure.DB.csproj" />
     <ProjectReference Include="..\..\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Users\" />
   </ItemGroup>
 
 </Project>

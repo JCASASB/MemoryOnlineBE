@@ -5,13 +5,12 @@ namespace Hispalance.Infraestructure.DB.Repositories.EF
     public class GenericRepositoryEFBase<TEntity> where TEntity : class
     {
         #region declarations
-        protected   DbSet<TEntity> _dbSet;
-        protected   IMyDbContext _context;
+        protected readonly DbContext _context;
         #endregion
 
-        public GenericRepositoryEFBase(IMyDbContext context)
+        public GenericRepositoryEFBase(DbContext context)
         {
-            this._dbSet = ((DbContext)context).Set<TEntity>();
+            //this._dbSet = ((DbContext)context).Set<TEntity>();
             this._context = context;
         }
     }

@@ -1,8 +1,10 @@
+using Hispalance.Infraestructure.DB.IRepositories.Generic;
+using Hispalance.Infraestructure.DB.Repositories.EF;
 using MemoryOnline.Infraestructure.EF.Game.Context;
 using MemoryOnline.Infraestructure.EF.Game.Repositories;
-using MemoryOnline.Infraestructure.Generic;
+using MemoryOnline.Infraestructure.EF.Users;
+using MemoryOnline.Infraestructure.EF.Users.Context;
 using MemoryOnline.Infraestructure.IRepository;
-using MemoryOnline.Infraestructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +42,7 @@ namespace MemoryOnline.Common.IOC
             return services;
         }
 
-        public static IServiceCollection AddEFMongoDB(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddEFMongoDB(this IServiceCollection services)
         {
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<AppGameDbContexMongoDB>());
@@ -50,6 +52,29 @@ namespace MemoryOnline.Common.IOC
             services.AddScoped<IMatchRepository, MatchRepositoryEF>();
 
             return services;
+        }
+
+        public static IServiceCollection AddEFUsers(this IServiceCollection services)
+        {
+            services.AddDbContext<UsersDbContext>();
+
+            // Añada esta línea para mapear DbContext a su implementación concreta
+            services.AddScoped<DbContext>(provider => provider.GetRequiredService<UsersDbContext>());
+
+            // 1. Registra la implementación concreta para su interfaz específica.
+            services.AddScoped<IUsersRepository, UsersRepository>();
+
+            return services;
+        }
+
+
+
+        
+        public static void AddGenericDIConfiguration(this IServiceCollection services)
+        {
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositoryEF<>));
+            services.AddScoped(typeof(IGenericRepositoryRead<>), typeof(GenericRepositoryEFRead<>));
+            services.AddScoped(typeof(IGenericRepositoryWrite<>), typeof(GenericRepositoryEFWrite<>));
         }
     }
     

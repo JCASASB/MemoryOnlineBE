@@ -4,9 +4,6 @@ using MemoryOnline.Domain.Domain.GameUseCases;
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Domain.IMatchUseCases;
 using MemoryOnline.Domain.Domain.MatchUseCases;
-using MemoryOnline.Infraestructure.IRepository;
-using MemoryOnline.Repository.Repository;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MemoryOnline.Common.IOC
@@ -33,6 +30,18 @@ namespace MemoryOnline.Common.IOC
 
             // Capa de aplicación
            // services.AddScoped<UsersApplication>();
+            return services;
+        }
+
+
+        public static IServiceCollection AddDependencyInjectionForWebApi(this IServiceCollection services)
+        {
+            // InMemory:
+            //services.AddEFSqlServer();
+            services.AddGenericDIConfiguration();
+            services.AddEFUsers();
+            //services.AddEFMongoDB("");
+
             return services;
         }
     }

@@ -11,7 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Generic\MemoryOnline.Infraestructure.Generic.csproj" />
+    <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
+    <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
   </ItemGroup>
 	
 </Project>

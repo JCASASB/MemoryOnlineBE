@@ -1,8 +1,6 @@
 ﻿using MediatR;
 using MemoryOnline.Apis.WebApi.Controllers.AuthController.Dtos;
-using MemoryOnline.Application.Application;
 using MemoryOnline.Application.Users.UsersApplication.Queries.GetUser;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

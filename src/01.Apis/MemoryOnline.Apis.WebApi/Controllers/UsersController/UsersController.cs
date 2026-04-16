@@ -26,7 +26,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(Guid id)
         {
-           
+            var users = _mediator.Send(new GetUserQuery("ejemplo"));
             return Ok();
         }
 

@@ -6,7 +6,7 @@ using MemoryOnline.Common.IOC;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDependencyInjectionForApplication();
+builder.Services.AddDependencyInjectionForWebApi();
 
 builder.Services.AddControllersWithViews(); // Suport per a MVC o API
 
