@@ -27,10 +27,10 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginUserDto login)
+        public async Task<IActionResult> Login([FromBody] LoginUserDto login)
         {
-            var user = _mediator.Send(new GetUserQuery(login.UserName)).Result;
-            
+            var user = await _mediator.Send(new GetUserQuery(login.UserName));
+
             if (user.Password == login.Password)
             {
                 var token = GenerarToken(login.UserName);

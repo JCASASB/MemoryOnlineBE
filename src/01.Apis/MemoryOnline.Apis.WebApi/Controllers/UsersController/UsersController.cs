@@ -26,8 +26,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(Guid id)
         {
-            var users = _mediator.Send(new GetUserQuery("ejemplo"));
-            return Ok();
+            var user = await _mediator.Send(new GetUserQuery("ejemplo"));
+            return Ok(user);
         }
 
         // GET: api/users/getbyname/{name}
@@ -35,8 +35,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpGet("/getbyname/{name}")]
         public async Task<IActionResult> GetUserByName(string name)
         {
-            var users = _mediator.Send(new GetUserQuery(name)).Result;
-            return Ok();
+            var user = await _mediator.Send(new GetUserQuery(name));
+            return Ok(user);
         }
 
         // GET: api/users/getall
@@ -44,7 +44,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpGet("/getall")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = _mediator.Send(new GetAllUsersQuery()).Result;
+            var users = await _mediator.Send(new GetAllUsersQuery());
 
             return Ok(users);
         }
@@ -53,9 +53,9 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] dynamic userDto)
         {
-            var user = _mediator.Send(new CreateUserCommand(userDto));
+            await _mediator.Send(new CreateUserCommand(userDto));
 
-            return Ok(user);
+            return Ok();
         }
     }
 }

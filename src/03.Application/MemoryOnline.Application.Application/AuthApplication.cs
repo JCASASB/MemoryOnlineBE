@@ -1,8 +1,6 @@
 ﻿using MemoryOnline.Domain.Domain.Specifications.Implementations;
 using MemoryOnline.Domain.Entities;
 using MemoryOnline.Infraestructure.IRepository;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MemoryOnline.Application.Application
 {
