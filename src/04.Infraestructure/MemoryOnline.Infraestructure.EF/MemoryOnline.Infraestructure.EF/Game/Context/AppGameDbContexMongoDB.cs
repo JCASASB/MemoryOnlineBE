@@ -7,6 +7,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
     {
         public AppGameDbContexMongoDB(DbContextOptions<AppGameDbContexMongoDB> options) : base(options)
         {
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

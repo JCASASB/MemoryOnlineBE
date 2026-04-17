@@ -47,13 +47,6 @@ builder.Services.AddMapsterConfig();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AppGameDbContextInMemory>();
-    // Esto crea la base de datos SI NO EXISTE basándose en tus modelos
-    context.Database.EnsureCreated();
-}
-
 // SignalR hubs
 app.UseCors();
 app.MapHub<GameHub>("/gamehub");

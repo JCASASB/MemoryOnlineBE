@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Hispalance.Infraestructure.DB.DBContext
 {
-    public class DBContextPostgres : DBContextMyBase, IMyDbContext
+    public class DBContextPostgres : DBContextMyBase
     {
         public DBContextPostgres(IConfiguration config) : base(config)
         {

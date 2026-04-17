@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Hispalance.Infraestructure.DB.DBContext
 {
-    public class DBContextMySql : DBContextMyBase, IMyDbContext
+    public class DBContextMySql : DBContextMyBase
     {
         public DBContextMySql(IConfiguration config) : base(config)
         {
