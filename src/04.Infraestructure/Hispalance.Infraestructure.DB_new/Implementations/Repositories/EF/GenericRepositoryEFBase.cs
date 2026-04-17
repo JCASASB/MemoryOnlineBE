@@ -10,7 +10,6 @@ namespace Hispalance.Infraestructure.DB.Repositories.EF
 
         public GenericRepositoryEFBase(DbContext context)
         {
-            //this._dbSet = ((DbContext)context).Set<TEntity>();
             this._context = context;
         }
     }

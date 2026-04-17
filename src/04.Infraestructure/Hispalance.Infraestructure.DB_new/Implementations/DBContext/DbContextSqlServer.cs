@@ -7,17 +7,19 @@ namespace Hispalance.Infraestructure.DB.DBContext
     {
         public DBContextSqlServer(IConfiguration config) : base(config)
         {
-            _connectionString = "Server=127.0.0.1,1433;Database=TuBaseDeDatos;User Id=SA;Password=TuPasswordFuerte123!;TrustServerCertificate=True;\r\n";
+            _connectionString = GetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
+
             optionsBuilder.UseSqlServer(_connectionString);
 
             base.OnConfiguring(optionsBuilder);
         }
 
-        protected string GetConnectionString()
+        protected override string GetConnectionString()
         {
             try
             {
@@ -26,7 +28,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
                 var database = _config.GetSection("DBSection:Database").Value;
                 var user = _config.GetSection("DBSection:User").Value;
                 var pass = _config.GetSection("DBSection:Password").Value;
-                var connectionString = String.Format("Server={0},{1};Database={2};User Id={3};Password={4}",
+                var connectionString = String.Format("Server={0},{1};Database={2};User Id={3};Password={4};TrustServerCertificate=True;",
                     server, port, database, user, pass);
 
                 return connectionString;

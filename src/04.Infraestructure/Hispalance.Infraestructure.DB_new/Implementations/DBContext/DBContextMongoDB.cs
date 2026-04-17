@@ -3,21 +3,23 @@ using Microsoft.Extensions.Configuration;
 
 namespace Hispalance.Infraestructure.DB.DBContext
 {
-    public class DBContextMyBase : DbContext
+    public class DBContextMongoDB : DBContextMyBase
     {
-        #region properties
-        protected IConfiguration _config;
+        private string _database;
 
-        protected string _connectionString;
-        #endregion
-
-        public DBContextMyBase(IConfiguration config) 
+        public DBContextMongoDB(IConfiguration config) : base(config)
         {
-            _config = config;
+            _connectionString = GetConnectionString();
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            options.UseMongoDB(_connectionString, _database);
 
-        protected virtual string GetConnectionString()
+            base.OnConfiguring(options);
+        }
+
+        protected override string GetConnectionString()
         {
             try
             {
@@ -26,8 +28,10 @@ namespace Hispalance.Infraestructure.DB.DBContext
                 var database = _config.GetSection("DBSection:Database").Value;
                 var user = _config.GetSection("DBSection:User").Value;
                 var pass = _config.GetSection("DBSection:Password").Value;
-                var connectionString = String.Format("server={0};Port={1};database={2};uid={3};pwd={4}",
+                var connectionString = String.Format("mongodb://{4}:{5}@{1}:{2}",
                     server, port, database, user, pass);
+
+                _database = database;
 
                 return connectionString;
             }
@@ -38,4 +42,5 @@ namespace Hispalance.Infraestructure.DB.DBContext
             }
         }
     }
+
 }

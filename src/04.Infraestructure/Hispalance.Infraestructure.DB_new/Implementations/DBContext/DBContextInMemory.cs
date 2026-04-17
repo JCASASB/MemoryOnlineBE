@@ -7,16 +7,29 @@ namespace Hispalance.Infraestructure.DB.DBContext
     {
         public DBContextInMemory(IConfiguration config) : base(config)
         {
+            _connectionString = GetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
-
-            // replace with your Server Version and Type
-            options.UseInMemoryDatabase("TuCadenaDeConexion");
+            options.UseInMemoryDatabase(_connectionString);
 
             base.OnConfiguring(options);
+        }
+
+        protected override string GetConnectionString()
+        {
+            try
+            {
+                var database = _config.GetSection("DBSection:Database").Value;
+
+                return database;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Algo falla al recuperar los datos " +
+                    "de la conection string en el dbcontext", ex);
+            }
         }
     }
 

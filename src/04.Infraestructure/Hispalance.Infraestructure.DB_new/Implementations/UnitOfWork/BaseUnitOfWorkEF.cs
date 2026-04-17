@@ -1,4 +1,5 @@
-﻿using System.Transactions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Transactions;
 
 namespace Hispalance.Infraestructure.DB.UnitOfWork
 {
@@ -8,9 +9,9 @@ namespace Hispalance.Infraestructure.DB.UnitOfWork
 
      //   private DbContextTransaction transaction { get; set; }
 
-        protected IMyDbContext _context;
+        protected DbContext _context;
 
-        public BaseUnitOfWorkEF(IMyDbContext context)
+        public BaseUnitOfWorkEF(DbContext context)
         {
             _context = context;
         }
