@@ -1,0 +1,129 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOMAIN: 'hispalance.com'
+  EC2_HOST: '34.204.77.103'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      # ===========================================
+      # 1. Checkout y Setup
+      # ===========================================
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # ===========================================
+      # 2. Publish proyectos (.NET 10)
+      # ===========================================
+      - name: Publish SignalR
+        run: |
+          dotnet publish src/01.Apis/MemoryOnline.Apis.Signalr/MemoryOnline.Apis.Signalr.csproj \
+            -c Release \
+            -f net10.0 \
+            -o ./publish/signalr
+
+      - name: Publish WebApi
+        run: |
+          dotnet publish src/01.Apis/MemoryOnline.Apis.WebApi/MemoryOnline.Apis.WebApi.csproj \
+            -c Release \
+            -f net10.0 \
+            -o ./publish/webapi
+
+      # ===========================================
+      # 3. Build imágenes Docker (ARM64 + .NET 10)
+      # ===========================================
+      - name: Build Docker image - SignalR
+        run: |
+          cd ./publish/signalr
+          echo "FROM mcr.microsoft.com/dotnet/aspnet:10.0" > Dockerfile
+          echo "WORKDIR /app" >> Dockerfile
+          echo "COPY . ." >> Dockerfile
+          echo "EXPOSE 8080" >> Dockerfile
+          echo 'ENTRYPOINT ["dotnet", "MemoryOnline.Apis.Signalr.dll"]' >> Dockerfile
+          docker build --platform linux/arm64 -t memoryonline-signalr:latest .
+
+      - name: Build Docker image - WebApi
+        run: |
+          cd ./publish/webapi
+          echo "FROM mcr.microsoft.com/dotnet/aspnet:10.0" > Dockerfile
+          echo "WORKDIR /app" >> Dockerfile
+          echo "COPY . ." >> Dockerfile
+          echo "EXPOSE 8080" >> Dockerfile
+          echo 'ENTRYPOINT ["dotnet", "MemoryOnline.Apis.WebApi.dll"]' >> Dockerfile
+          docker build --platform linux/arm64 -t memoryonline-webapi:latest .
+
+      # ===========================================
+      # 4. Exportar imágenes
+      # ===========================================
+      - name: Exportar imágenes Docker
+        run: |
+          docker save memoryonline-signalr:latest | gzip > signalr-image.tar.gz
+          docker save memoryonline-webapi:latest | gzip > webapi-image.tar.gz
+
+      # ===========================================
+      # 5. Configurar SSH
+      # ===========================================
+      - name: Configurar SSH
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ env.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      # ===========================================
+      # 6. Copiar archivos a EC2
+      # ===========================================
+      - name: Copiar archivos a EC2
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "📤 Subiendo archivos a /home/$EC2_USER/ ..."
+          scp signalr-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp webapi-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp .github/scripts/deploy.sh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          echo "✅ Archivos subidos"
+
+      # ===========================================
+      # 7. Ejecutar deploy en EC2
+      # ===========================================
+      - name: Ejecutar deploy
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
+            cd /home/${{ secrets.EC2_USER }}
+            chmod +x deploy.sh
+            export CLOUDFLARE_TOKEN="${{ secrets.CLOUDFLARE_TOKEN }}"
+            export DOMAIN="${{ env.DOMAIN }}"
+            export EC2_USER="${{ secrets.EC2_USER }}"
+            ./deploy.sh
+          ENDSSH
+
+      # ===========================================
+      # 8. Verificación final
+      # ===========================================
+      - name: Verificar deploy
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "🔍 Verificando servicios..."
+          ssh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }} "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"

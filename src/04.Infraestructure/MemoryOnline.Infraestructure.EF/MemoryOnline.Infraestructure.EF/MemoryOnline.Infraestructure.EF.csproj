@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.5" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.5" />
+	<PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
+    <ProjectReference Include="..\..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
+    <ProjectReference Include="..\..\Hispalance.Infraestructure.DB_new\Hispalance.Infraestructure.DB.csproj" />
+    <ProjectReference Include="..\..\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
+  </ItemGroup>
+
+</Project>

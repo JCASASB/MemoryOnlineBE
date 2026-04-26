@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/Elementos de la solución/">
+    <File Path="Readme.txt" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/01.Apis/">
+    <Project Path="src/01.Apis/Hispalance.Presentation.Extensions/Hispalance.Presentation.Extensions.csproj" Id="342f3b35-b7a0-4a36-bc70-104eb0247c00" />
+    <Project Path="src/01.Apis/MemoryOnline.Apis.Signalr/MemoryOnline.Apis.Signalr.csproj" />
+    <Project Path="src/01.Apis/MemoryOnline.Apis.Utils/MemoryOnline.Apis.Utils.csproj" Id="778d8f74-884b-4f1d-a606-4fa62ed8ca74" />
+    <Project Path="src/01.Apis/MemoryOnline.Apis.WebApi/MemoryOnline.Apis.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/src/02.Domain/">
+    <Project Path="src/02.Domain/MemoryOnline.Domain.Domain/MemoryOnline.Domain.Domain.csproj" />
+    <Project Path="src/02.Domain/MemoryOnline.Domain.Entities/MemoryOnline.Domain.Entities.csproj" />
+  </Folder>
+  <Folder Name="/src/03.Application/">
+    <Project Path="src/03.Application/MemoryOnline.Application.Application/MemoryOnline.Application.Application.csproj" />
+    <Project Path="src/03.Application/MemoryOnline.Application.Events/MemoryOnline.Application.Events.csproj" Id="09497054-a1dc-4b04-a182-c13bbca0738e" />
+    <Project Path="src/03.Application/MemoryOnline.Application.Users/MemoryOnline.Application.Users.csproj" Id="5cea042d-6826-4362-a0d7-eb3d0f0f4145" />
+  </Folder>
+  <Folder Name="/src/04.Infraestructure/">
+    <Project Path="src/04.Infraestructure/Hispalance.Infraestructure.DB_new/Hispalance.Infraestructure.DB.csproj" />
+    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF/MemoryOnline.Infraestructure.EF.csproj" Id="ef64018d-f418-415d-b98e-b273062ba3bb" />
+    <Project Path="src/04.Infraestructure/MemoryOnline.Infraestructure.Repository/MemoryOnline.Infraestructure.IRepository.csproj" Id="fce085b7-9b5c-4690-b698-b69409988287" />
+  </Folder>
+  <Folder Name="/src/05.Common/">
+    <Project Path="src/05.Common/MemoryOnline.Common.IOC/MemoryOnline.Common.IOC.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/04.Infraestructure/" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  memoryonline.apis.signalr:
+    image: ${DOCKER_REGISTRY-}memoryonlineapissignalr
+    build:
+      context: .
+      dockerfile: src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - app-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=TuPasswordFuerte123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - app-network
+
+volumes:
+  mssql_data:
+
+networks:
+  app-network:
+    driver: bridge

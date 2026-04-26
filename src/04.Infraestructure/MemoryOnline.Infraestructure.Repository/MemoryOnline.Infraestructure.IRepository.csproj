@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
+    <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
+  </ItemGroup>
+
+</Project>
