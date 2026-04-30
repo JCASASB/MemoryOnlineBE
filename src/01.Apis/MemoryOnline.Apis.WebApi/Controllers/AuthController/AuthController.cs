@@ -12,7 +12,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IConfiguration _config;
         private readonly ILogger<AuthController> _logger;

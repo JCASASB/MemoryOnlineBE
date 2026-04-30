@@ -2,16 +2,16 @@
 using MediatR;
 using MemoryOnline.Domain.Domain.Specifications.Implementations;
 using System.Linq;
-using MemoryOnline.Domain.Entities;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Domain.Entities.Users;
+using MemoryOnline.Infraestructure.IRepository.Application;
 
 namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
 {
     public class GetUserHandler : IRequestHandler<GetUserQuery, Usuario>
     {
-        private readonly IUsersRepository _userRepository;
+        private readonly IApplicationRepository _userRepository;
 
-        public GetUserHandler(IUsersRepository userRepository)
+        public GetUserHandler(IApplicationRepository userRepository)
         {
             _userRepository = userRepository;
         }

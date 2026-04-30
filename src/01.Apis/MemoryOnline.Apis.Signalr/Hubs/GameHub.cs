@@ -59,7 +59,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
 
             await Clients.Caller.SendAsync("LogFromServer", "Match creado");
         }
-
+        
         public async Task UpdateGameState(GameStateDtoIn updatedGame, string matchId)
         {
             String userId = Context.UserIdentifier ?? "UnknownUser";

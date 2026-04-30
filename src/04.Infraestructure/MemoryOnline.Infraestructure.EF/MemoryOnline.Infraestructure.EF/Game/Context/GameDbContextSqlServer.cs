@@ -1,12 +1,12 @@
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class AppGameDbContextSqlServer : AppGameDbContextBase, IApplicationDbContext
+    public class GameDbContextSqlServer : GameDbContextBase, IGameDbContext
     {
-        public AppGameDbContextSqlServer(DbContextOptions<AppGameDbContextSqlServer> options) : base(options)
+        public GameDbContextSqlServer(DbContextOptions<GameDbContextSqlServer> options) : base(options)
         {
         }
 
@@ -25,7 +25,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
                 optionsBuilder.UseSqlServer("Server=127.0.0.1,1433;Database=GameDb;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True;");
             }
         }
-        async Task<int> IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)
+        async Task<int> IGameDbContext.SaveChangesAsync(CancellationToken cancellationToken)
         {
             return await base.SaveChangesAsync(cancellationToken);
         }

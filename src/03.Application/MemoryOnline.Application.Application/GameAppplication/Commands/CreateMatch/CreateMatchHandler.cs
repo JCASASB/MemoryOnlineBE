@@ -1,17 +1,17 @@
 using MediatR;
 using MemoryOnline.Domain.Domain.IMatchUseCases;
 using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch
 {
     public class CreateMatchHandler : IRequestHandler<CreateMatchCommand>
     {
         private readonly ICreateMatchUseCase _createMatchUseCase;
-        private readonly IMatchRepository _matchRepository;
+        private readonly IGameRepository _matchRepository;
 
         public CreateMatchHandler(
-            IMatchRepository matchRepository
+            IGameRepository matchRepository
             , ICreateMatchUseCase createMatchUseCase)
         {
             _createMatchUseCase = createMatchUseCase;

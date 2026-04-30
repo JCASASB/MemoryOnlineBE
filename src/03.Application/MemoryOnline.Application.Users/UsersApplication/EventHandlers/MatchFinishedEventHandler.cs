@@ -1,16 +1,16 @@
 using MediatR;
 using MemoryOnline.Application.Application.Events;
 using MemoryOnline.Domain.Domain.MatchUseCases;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Application;
 
 namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
 {
     public class MatchFinishedEventHandler : INotificationHandler<DomainEventNotificationAdaptor<MatchFinishedDomainEvent>>
     {
         
-         private readonly IUsersRepository _userRepository;
+         private readonly IApplicationRepository _userRepository;
 
-        public MatchFinishedEventHandler(IUsersRepository userRepository)
+        public MatchFinishedEventHandler(IApplicationRepository userRepository)
         {
              _userRepository = userRepository;
         }

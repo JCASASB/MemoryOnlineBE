@@ -4,9 +4,9 @@ using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public abstract class AppGameDbContextBase : DbContext
+    public abstract class GameDbContextBase : DbContext
     {
-        protected AppGameDbContextBase(DbContextOptions options) : base(options)
+        protected GameDbContextBase(DbContextOptions options) : base(options)
         {
         }
 

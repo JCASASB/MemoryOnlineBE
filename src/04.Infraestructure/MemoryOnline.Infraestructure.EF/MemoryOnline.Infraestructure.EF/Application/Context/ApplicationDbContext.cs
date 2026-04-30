@@ -1,13 +1,13 @@
 ﻿using Hispalance.Infraestructure.DB.DBContext;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace MemoryOnline.Infraestructure.EF.Users.Context
+namespace MemoryOnline.Infraestructure.EF.Application.Context
 {
-    public class UsersDbContext : DBContextInMemory
+    public class ApplicationDbContext : DBContextInMemory
     {
-        public UsersDbContext(IConfiguration config) : base(config)
+        public ApplicationDbContext(IConfiguration config) : base(config)
         {
             Database.EnsureCreated();
         }

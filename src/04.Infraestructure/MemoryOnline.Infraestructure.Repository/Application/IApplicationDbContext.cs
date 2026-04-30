@@ -1,12 +1,10 @@
-﻿using MemoryOnline.Domain.Entities.Game;
+﻿using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace MemoryOnline.Infraestructure.IRepository
+namespace MemoryOnline.Infraestructure.IRepository.Application
 {
     public interface IApplicationDbContext
     {
-        DbSet<Match> Matches { get; set; }
-
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

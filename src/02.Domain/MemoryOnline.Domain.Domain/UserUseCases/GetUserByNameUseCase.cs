@@ -1,4 +1,4 @@
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Entities.Users;
 
 namespace MemoryOnline.Domain.Domain.UserUseCases
 {

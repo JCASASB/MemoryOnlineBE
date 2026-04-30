@@ -1,14 +1,14 @@
 using MediatR;
 using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Queries
 {
     public class GetAllBoardStatesHandler : IRequestHandler<GetAllBoardStatesQuery, List<BoardState>>
     {
-        private readonly IMatchRepository _matchRepository;
+        private readonly IGameRepository _matchRepository;
 
-        public GetAllBoardStatesHandler(IMatchRepository matchRepository)
+        public GetAllBoardStatesHandler(IGameRepository matchRepository)
         {
             _matchRepository = matchRepository;
         }

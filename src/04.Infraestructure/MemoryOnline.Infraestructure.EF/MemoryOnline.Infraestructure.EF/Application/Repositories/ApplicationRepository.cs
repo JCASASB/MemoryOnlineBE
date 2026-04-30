@@ -1,16 +1,16 @@
 ﻿using Hispalance.Infraestructure.DB.IRepositories.Generic;
 using MemoryOnline.Domain.Domain.Specifications.Interfaces;
-using MemoryOnline.Domain.Entities;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Domain.Entities.Users;
+using MemoryOnline.Infraestructure.IRepository.Application;
 
-namespace MemoryOnline.Infraestructure.EF.Users
+namespace MemoryOnline.Infraestructure.EF.Application.Repositories
 {
-    public class UsersRepository : IUsersRepository
+    public class ApplicationRepository : IApplicationRepository
     {
 
         private readonly IGenericRepository<Usuario> _repository;
 
-        public UsersRepository(IGenericRepository<Usuario> repository)
+        public ApplicationRepository(IGenericRepository<Usuario> repository)
         {
             _repository = repository;
         }
@@ -42,6 +42,8 @@ namespace MemoryOnline.Infraestructure.EF.Users
                 includeProperties: spec.Includes.ToArray() // Convertimos la lista a Array para el 'params'
             );
         }
+
+
 
     }
 }

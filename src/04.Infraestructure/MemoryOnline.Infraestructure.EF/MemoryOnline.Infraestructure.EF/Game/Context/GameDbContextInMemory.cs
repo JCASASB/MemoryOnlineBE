@@ -1,12 +1,12 @@
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class AppGameDbContextInMemory : AppGameDbContextBase, IApplicationDbContext
+    public class GameDbContextInMemory : GameDbContextBase, IGameDbContext
     {
-        public AppGameDbContextInMemory(DbContextOptions<AppGameDbContextInMemory> options) : base(options)
+        public GameDbContextInMemory(DbContextOptions<GameDbContextInMemory> options) : base(options)
         {
         }
 
@@ -26,7 +26,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
             }
         }
 
-        async Task<int> IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)
+        async Task<int> IGameDbContext.SaveChangesAsync(CancellationToken cancellationToken)
         {
             return await base.SaveChangesAsync(cancellationToken);
         }

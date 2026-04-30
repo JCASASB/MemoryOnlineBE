@@ -1,10 +1,11 @@
 using Hispalance.Infraestructure.DB.IRepositories.Generic;
 using Hispalance.Infraestructure.DB.Repositories.EF;
+using MemoryOnline.Infraestructure.EF.Application.Context;
+using MemoryOnline.Infraestructure.EF.Application.Repositories;
 using MemoryOnline.Infraestructure.EF.Game.Context;
 using MemoryOnline.Infraestructure.EF.Game.Repositories;
-using MemoryOnline.Infraestructure.EF.Users;
-using MemoryOnline.Infraestructure.EF.Users.Context;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Application;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,12 +18,12 @@ namespace MemoryOnline.Common.IOC
         /// </summary>
         public static IServiceCollection AddEFInMemory(this IServiceCollection services)
         {
-            services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<AppGameDbContextInMemory>());
+            services.AddScoped<IGameDbContext>(provider =>
+                provider.GetRequiredService<GameDbContextInMemory>());
 
-            services.AddDbContext<AppGameDbContextInMemory>();
+            services.AddDbContext<GameDbContextInMemory>();
 
-            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
+            services.AddScoped<IGameRepository, GameRepositoryEF>();
 
             return services;
         }
@@ -32,34 +33,34 @@ namespace MemoryOnline.Common.IOC
         /// </summary>
         public static IServiceCollection AddEFSqlServer(this IServiceCollection services)
         {
-            services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<AppGameDbContextSqlServer>());
+            services.AddScoped<IGameDbContext>(provider =>
+                provider.GetRequiredService<GameDbContextSqlServer>());
 
-            services.AddDbContext<AppGameDbContextSqlServer>();
+            services.AddDbContext<GameDbContextSqlServer>();
 
-            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
+            services.AddScoped<IGameRepository, GameRepositoryEF>();
 
             return services;
         }
 
         public static IServiceCollection AddEFMongoDB(this IServiceCollection services)
         {
-            services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<AppGameDbContexMongoDB>());
+            services.AddScoped<IGameDbContext>(provider =>
+                provider.GetRequiredService<GameDbContexMongoDB>());
 
-            services.AddDbContext<AppGameDbContexMongoDB>();
+            services.AddDbContext<GameDbContexMongoDB>();
 
-            services.AddScoped<IMatchRepository, MatchRepositoryEF>();
+            services.AddScoped<IGameRepository, GameRepositoryEF>();
 
             return services;
         }
 
         public static IServiceCollection AddEFUsers(this IServiceCollection services)
         {
-            services.AddDbContext<UsersDbContext>();
+            services.AddDbContext<ApplicationDbContext>();
 
             // 1. Registra la implementación concreta para su interfaz específica.
-            services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
             return services;
         }
@@ -77,16 +78,16 @@ namespace MemoryOnline.Common.IOC
 
     internal class UsersGenericRepositoryEF<TEntity> : GenericRepositoryEF<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEF(UsersDbContext context) : base(context) { }
+        public UsersGenericRepositoryEF(ApplicationDbContext context) : base(context) { }
     }
 
     internal class UsersGenericRepositoryEFRead<TEntity> : GenericRepositoryEFRead<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEFRead(UsersDbContext context) : base(context) { }
+        public UsersGenericRepositoryEFRead(ApplicationDbContext context) : base(context) { }
     }
 
     internal class UsersGenericRepositoryEFWrite<TEntity> : GenericRepositoryEFWrite<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEFWrite(UsersDbContext context) : base(context) { }
+        public UsersGenericRepositoryEFWrite(ApplicationDbContext context) : base(context) { }
     }
 }

@@ -2,18 +2,18 @@
 using MemoryOnline.Application.Application.Events;
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Entities;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState
 {
     public class AddNewStateHandler : IRequestHandler<AddNewStateCommand>
     {
-        private readonly IMatchRepository _gameRepository;
+        private readonly IGameRepository _gameRepository;
         private readonly IAddNewStateUseCase _addNewStateUseCase;
         private readonly IMediator _mediator;
 
         public AddNewStateHandler(
-            IMatchRepository gameRepository
+            IGameRepository gameRepository
             , IAddNewStateUseCase addNewStateUseCase
             , IMediator mediator)
         {

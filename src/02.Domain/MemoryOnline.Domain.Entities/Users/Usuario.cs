@@ -1,5 +1,4 @@
-﻿
-namespace MemoryOnline.Domain.Entities
+﻿namespace MemoryOnline.Domain.Entities.Users
 {
     public class Usuario
     {

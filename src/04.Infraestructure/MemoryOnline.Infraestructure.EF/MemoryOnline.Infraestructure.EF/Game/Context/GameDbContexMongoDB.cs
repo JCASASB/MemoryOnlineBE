@@ -1,11 +1,11 @@
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class AppGameDbContexMongoDB : AppGameDbContextBase, IApplicationDbContext
+    public class GameDbContexMongoDB : GameDbContextBase, IGameDbContext
     {
-        public AppGameDbContexMongoDB(DbContextOptions<AppGameDbContexMongoDB> options) : base(options)
+        public GameDbContexMongoDB(DbContextOptions<GameDbContexMongoDB> options) : base(options)
         {
             Database.EnsureCreated();
         }
@@ -18,7 +18,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
             }
         }
 
-        async Task<int> IApplicationDbContext.SaveChangesAsync(CancellationToken cancellationToken)
+        async Task<int> IGameDbContext.SaveChangesAsync(CancellationToken cancellationToken)
         {
             return await base.SaveChangesAsync(cancellationToken);
         }

@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using MemoryOnline.Domain.Entities;
+using MemoryOnline.Domain.Entities.Users;
 
 namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
 {

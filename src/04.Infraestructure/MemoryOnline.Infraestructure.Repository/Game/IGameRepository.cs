@@ -1,8 +1,8 @@
 ﻿using MemoryOnline.Domain.Entities.Game;
 
-namespace MemoryOnline.Infraestructure.IRepository
+namespace MemoryOnline.Infraestructure.IRepository.Game
 {
-    public interface IMatchRepository
+    public interface IGameRepository
     {
         Task<IEnumerable<Match>> GetAllAsync();
         Task<Match> GetMatchByNameAsync(string name);

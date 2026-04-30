@@ -1,13 +1,13 @@
 using MediatR;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 
 namespace MemoryOnline.Application.Application.GameAppplication.Queries
 {
     public class GetMatchIdFromNameHandler : IRequestHandler<GetMatchIdFromNameQuery, Guid>
     {
-        private readonly IMatchRepository _gameRepository;
+        private readonly IGameRepository _gameRepository;
 
-        public GetMatchIdFromNameHandler(IMatchRepository gameRepository)
+        public GetMatchIdFromNameHandler(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }

@@ -9,7 +9,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.UsersController
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private readonly ILogger<UsersController> _logger;
         private readonly IMediator _mediator;

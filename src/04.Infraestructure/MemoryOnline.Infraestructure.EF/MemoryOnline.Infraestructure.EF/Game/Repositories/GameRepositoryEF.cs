@@ -1,14 +1,14 @@
 using MemoryOnline.Domain.Entities.Game;
-using MemoryOnline.Infraestructure.IRepository;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Repositories
 {
-    public class MatchRepositoryEF : IMatchRepository
+    public class GameRepositoryEF : IGameRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IGameDbContext _context;
 
-        public MatchRepositoryEF(IApplicationDbContext context)
+        public GameRepositoryEF(IGameDbContext context)
         {
             _context = context;
         }
