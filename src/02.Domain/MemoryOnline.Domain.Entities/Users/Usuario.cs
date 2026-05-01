@@ -1,4 +1,6 @@
-﻿namespace MemoryOnline.Domain.Entities.Users
+﻿using MemoryOnline.Domain.Entities.Stats;
+
+namespace MemoryOnline.Domain.Entities.Users
 {
     public class Usuario
     {
@@ -7,6 +9,8 @@
         public int Age { get; set; }
         public string Password { get; set; }
         public string ConnectionIdHub { get; set; }
+
+        public List<UserResults> Results { get; set; } 
 
         public class Builder
         {
@@ -17,6 +21,7 @@
                 // Valores por defecto iniciales
                 _usuario.Id = Guid.NewGuid();
                 _usuario.ConnectionIdHub = "";
+                _usuario.Results = new List<UserResults>();
             }
 
             public Builder WithId(Guid id)
@@ -46,6 +51,12 @@
             public Builder WithConnectionIdHub(string connectionIdHub)
             {
                 _usuario.ConnectionIdHub = connectionIdHub;
+                return this;
+            }
+
+            public Builder WithUserResults(List<UserResults> results)
+            {
+                _usuario.Results = results;
                 return this;
             }
 

@@ -17,7 +17,7 @@ namespace MemoryOnline.Application.Application
         {
             var filterSpec = new UserFilterByNameSpec(name);
 
-            var users = await _userRepository.GetWithFilter(filterSpec);
+            var users = await _userRepository.GetUserWithFilter(filterSpec);
 
             var user = users.FirstOrDefault<Usuario>();
 

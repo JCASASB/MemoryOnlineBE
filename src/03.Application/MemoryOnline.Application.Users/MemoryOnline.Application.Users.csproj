@@ -15,5 +15,9 @@
     <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
     <ProjectReference Include="..\MemoryOnline.Application.Events\MemoryOnline.Application.Events.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UsersStats\Commands\" />
+  </ItemGroup>
 	
 </Project>

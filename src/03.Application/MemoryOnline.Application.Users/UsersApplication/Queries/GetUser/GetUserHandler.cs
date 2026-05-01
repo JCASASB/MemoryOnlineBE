@@ -1,7 +1,6 @@
 ﻿
 using MediatR;
 using MemoryOnline.Domain.Domain.Specifications.Implementations;
-using System.Linq;
 using MemoryOnline.Domain.Entities.Users;
 using MemoryOnline.Infraestructure.IRepository.Application;
 
@@ -22,7 +21,7 @@ namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
             {
                 var filterSpec = new UserFilterByNameSpec(request.name);
 
-                var users = await _userRepository.GetWithFilter(filterSpec);
+                var users = await _userRepository.GetUserWithFilter(filterSpec);
 
                 Usuario? user = null;
                 using (var e = users.GetEnumerator())

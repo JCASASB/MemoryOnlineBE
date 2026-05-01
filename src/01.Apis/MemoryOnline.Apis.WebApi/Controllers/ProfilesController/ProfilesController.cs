@@ -1,8 +1,5 @@
 using MediatR;
-using MemoryOnline.Application.Users.UsersApplication.Commands.Create;
-using MemoryOnline.Application.Users.UsersApplication.Queries.GetAllUsers;
 using MemoryOnline.Application.Users.UsersApplication.Queries.GetUser;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MemoryOnline.Apis.WebApi.Controllers.ProfilesController
@@ -22,11 +19,11 @@ namespace MemoryOnline.Apis.WebApi.Controllers.ProfilesController
             _mediator = mediator;
         }
 
-        // GET: api/profiles/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(Guid id)
+        // GET: api/profiles/stats/{id}
+        [HttpGet("stats/{id}")]
+        public async Task<IActionResult> GetUserStats(Guid id)
         {
-            var user = await _mediator.Send(new GetUserQuery("ejemplo"));
+            var user = await _mediator.Send(new GetUserStatsQuery(id));
             return Ok(user);
         }
 

@@ -1,6 +1,7 @@
 using MediatR;
 using MemoryOnline.Application.Application.Events;
 using MemoryOnline.Domain.Domain.MatchUseCases;
+using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Infraestructure.IRepository.Application;
 
 namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
@@ -8,11 +9,11 @@ namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
     public class MatchFinishedEventHandler : INotificationHandler<DomainEventNotificationAdaptor<MatchFinishedDomainEvent>>
     {
         
-         private readonly IApplicationRepository _userRepository;
+         private readonly IApplicationRepository _appRepository;
 
-        public MatchFinishedEventHandler(IApplicationRepository userRepository)
+        public MatchFinishedEventHandler(IApplicationRepository appRepository)
         {
-             _userRepository = userRepository;
+             _appRepository = appRepository;
         }
 
         public async Task Handle(DomainEventNotificationAdaptor<MatchFinishedDomainEvent> notification, CancellationToken cancellationToken)
@@ -24,7 +25,15 @@ namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
 
             if (winnerId != System.Guid.Empty)
             {
-              //  _userRepository
+                UserResults results = new UserResults();
+                results.MatchId = matchId;
+                results.Id = matchId;
+                results.Moves = 1;
+                results.Fails = 0;
+                results.Matchs = 0;
+                results.Winner = false;
+
+                await _appRepository.AddUserResultsAsync(results);
             }
 
             // Remueve esta línea cuando tengas tus llamadas asíncronas reales a la base de datos

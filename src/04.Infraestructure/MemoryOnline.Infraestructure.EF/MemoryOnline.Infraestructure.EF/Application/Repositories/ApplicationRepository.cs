@@ -1,5 +1,6 @@
 ﻿using Hispalance.Infraestructure.DB.IRepositories.Generic;
 using MemoryOnline.Domain.Domain.Specifications.Interfaces;
+using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Domain.Entities.Users;
 using MemoryOnline.Infraestructure.IRepository.Application;
 
@@ -10,19 +11,44 @@ namespace MemoryOnline.Infraestructure.EF.Application.Repositories
 
         private readonly IGenericRepository<Usuario> _repository;
 
-        public ApplicationRepository(IGenericRepository<Usuario> repository)
+        private readonly IGenericRepository<UserResults> _repositoryResults;
+
+        public ApplicationRepository(
+            IGenericRepository<Usuario> repository
+            , IGenericRepository<UserResults> repositoryResults)
         {
             _repository = repository;
+
+            _repositoryResults = repositoryResults;
         }
 
-        public async Task AddAsync(Usuario entityToAdd)
+        public async Task AddUserAsync(Usuario entityToAdd)
         {
             _repository.Add(entityToAdd);
 
             await _repository.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Usuario>> GetWithFilter(ISpecification<Usuario> spec)
+        public async Task AddUserResultsAsync(UserResults results)
+        {
+            try
+            {
+                _repositoryResults.Add(results);
+
+                await _repositoryResults.SaveChangesAsync();
+
+            }
+            catch (Exception ex) {
+                throw new Exception($"Error al agregar los resultados del usuario: {ex.Message}", ex);
+            }
+        }
+
+        public Task<IEnumerable<UserResults>> GetUserResultsWithFilterAsync(ISpecification<Guid> spec)
+        {
+            return _repositoryResults.GetAllAsync();
+        }
+
+        public async Task<IEnumerable<Usuario>> GetUserWithFilter(ISpecification<Usuario> spec)
         {
             Func<IQueryable<Usuario>, IOrderedQueryable<Usuario>> orderByFunc = null;
 

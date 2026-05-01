@@ -1,4 +1,5 @@
 ﻿using Hispalance.Infraestructure.DB.DBContext;
+using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,8 @@ namespace MemoryOnline.Infraestructure.EF.Application.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Usuario>();
+
+            modelBuilder.Entity<UserResults>();
 
             base.OnModelCreating(modelBuilder);
 

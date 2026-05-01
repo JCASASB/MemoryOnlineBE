@@ -20,7 +20,7 @@ namespace MemoryOnline.Application.Users.UsersApplication.Commands.Create
                                         .WithPassword(request.password)
                                         .Build();
 
-            await _userRepository.AddAsync(user);
+            await _userRepository.AddUserAsync(user);
 
             return user;
         }
