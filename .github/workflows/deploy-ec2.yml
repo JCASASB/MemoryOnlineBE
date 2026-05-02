@@ -8,7 +8,7 @@ on:
 env:
   DOTNET_VERSION: '10.0.x'
   DOMAIN: 'hispalance.com'
-  EC2_HOST: '35.153.200.167'
+  EC2_HOST: '52.90.107.96'
 
 jobs:
   build-and-deploy:
