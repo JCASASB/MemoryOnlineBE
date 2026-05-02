@@ -41,7 +41,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // CORS - Aplicar política
-app.UseCors("AllowAll");
+app.UseCors();
 
 //From My Extensions
 app.AddOpenApiScalarForApplication();
