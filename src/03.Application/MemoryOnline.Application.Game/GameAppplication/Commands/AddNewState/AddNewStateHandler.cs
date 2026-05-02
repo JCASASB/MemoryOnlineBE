@@ -4,7 +4,7 @@ using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Entities;
 using MemoryOnline.Infraestructure.IRepository.Game;
 
-namespace MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState
+namespace MemoryOnline.Application.Game.GameAppplication.Commands.UpdateGameState
 {
     public class AddNewStateHandler : IRequestHandler<AddNewStateCommand>
     {

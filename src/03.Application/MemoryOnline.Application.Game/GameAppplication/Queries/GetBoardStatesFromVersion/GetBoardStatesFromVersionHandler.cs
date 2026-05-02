@@ -2,7 +2,7 @@ using MediatR;
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository.Game;
 
-namespace MemoryOnline.Application.Application.GameAppplication.Queries
+namespace MemoryOnline.Application.Game.GameAppplication.Queries.GetBoardStatesFromVersion
 {
     public class GetBoardStatesFromVersionHandler : IRequestHandler<GetBoardStatesFromVersionQuery, List<BoardState>>
     {

@@ -14,8 +14,8 @@
     <Project Path="src/02.Domain/MemoryOnline.Domain.Entities/MemoryOnline.Domain.Entities.csproj" />
   </Folder>
   <Folder Name="/src/03.Application/">
-    <Project Path="src/03.Application/MemoryOnline.Application.Application/MemoryOnline.Application.Application.csproj" />
     <Project Path="src/03.Application/MemoryOnline.Application.Events/MemoryOnline.Application.Events.csproj" Id="09497054-a1dc-4b04-a182-c13bbca0738e" />
+    <Project Path="src/03.Application/MemoryOnline.Application.Game/MemoryOnline.Application.Game.csproj" />
     <Project Path="src/03.Application/MemoryOnline.Application.Users/MemoryOnline.Application.Users.csproj" Id="5cea042d-6826-4362-a0d7-eb3d0f0f4145" />
   </Folder>
   <Folder Name="/src/04.Infraestructure/">

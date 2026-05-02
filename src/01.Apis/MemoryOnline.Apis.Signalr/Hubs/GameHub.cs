@@ -2,12 +2,13 @@ using MapsterMapper;
 using MediatR;
 using MemoryOnline.Apis.Utils.DTOs.In;
 using MemoryOnline.Apis.Utils.DTOs.Out;
-using MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch;
-using MemoryOnline.Application.Application.GameAppplication.Commands.UpdateGameState;
-using MemoryOnline.Application.Application.GameAppplication.Queries;
 using MemoryOnline.Domain.Entities.Game;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using MemoryOnline.Application.Game.GameAppplication.Queries.GetMatchIdFromName;
+using MemoryOnline.Application.Game.GameAppplication.Commands.UpdateGameState;
+using MemoryOnline.Application.Game.GameAppplication.Commands.CreateMatch;
+using MemoryOnline.Application.Game.GameAppplication.Queries.GetBoardStatesFromVersion;
 
 namespace MemoryOnline.Apis.Signalr.Hubs
 {

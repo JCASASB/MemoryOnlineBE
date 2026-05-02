@@ -1,7 +1,7 @@
 using MediatR;
 using MemoryOnline.Infraestructure.IRepository.Game;
 
-namespace MemoryOnline.Application.Application.GameAppplication.Queries
+namespace MemoryOnline.Application.Game.GameAppplication.Queries.GetMatchIdFromName
 {
     public class GetMatchIdFromNameHandler : IRequestHandler<GetMatchIdFromNameQuery, Guid>
     {

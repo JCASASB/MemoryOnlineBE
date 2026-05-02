@@ -3,7 +3,7 @@ using MemoryOnline.Domain.Domain.IMatchUseCases;
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Infraestructure.IRepository.Game;
 
-namespace MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch
+namespace MemoryOnline.Application.Game.GameAppplication.Commands.CreateMatch
 {
     public class CreateMatchHandler : IRequestHandler<CreateMatchCommand>
     {

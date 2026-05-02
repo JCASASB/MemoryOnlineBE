@@ -2,8 +2,7 @@ using Hispalance.Presentation.Extensions.AutoriAuthori;
 using MemoryOnline.Apis.Signalr;
 using MemoryOnline.Apis.Signalr.Hubs;
 using MemoryOnline.Apis.Utils;
-using MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch;
-using MemoryOnline.Application.Application.GameAppplication.EventHandlers;
+using MemoryOnline.Application.Game.GameAppplication.Commands.CreateMatch;
 using MemoryOnline.Common.IOC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -71,7 +70,6 @@ builder.Services.AddDependencyInjectionForGame();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssemblyContaining<CreateMatchHandler>(); 
-    cfg.RegisterServicesFromAssemblyContaining<MatchFinishedEventHandler>(); 
 });
 
 // Registrar configuración de Mapster, mapeo de dtos

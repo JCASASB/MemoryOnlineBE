@@ -19,8 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\03.Application\MemoryOnline.Application.Application\MemoryOnline.Application.Application.csproj" />
-    <ProjectReference Include="..\..\03.Application\MemoryOnline.Application.Users\MemoryOnline.Application.Users.csproj" />
+    <ProjectReference Include="..\..\03.Application\MemoryOnline.Application.Game\MemoryOnline.Application.Game.csproj" />
     <ProjectReference Include="..\..\05.Common\MemoryOnline.Common.IOC\MemoryOnline.Common.IOC.csproj" />
     <ProjectReference Include="..\Hispalance.Presentation.Extensions\Hispalance.Presentation.Extensions.csproj" />
     <ProjectReference Include="..\MemoryOnline.Apis.Utils\MemoryOnline.Apis.Utils.csproj" />

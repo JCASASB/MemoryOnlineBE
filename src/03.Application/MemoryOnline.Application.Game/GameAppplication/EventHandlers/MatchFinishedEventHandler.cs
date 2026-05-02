@@ -4,7 +4,7 @@ using MemoryOnline.Domain.Domain.MatchUseCases;
 using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Infraestructure.IRepository.Application;
 
-namespace MemoryOnline.Application.Application.GameAppplication.EventHandlers
+namespace MemoryOnline.Application.Game.GameAppplication.EventHandlers
 {
     public class MatchFinishedEventHandler : INotificationHandler<DomainEventNotificationAdaptor<MatchFinishedDomainEvent>>
     {
