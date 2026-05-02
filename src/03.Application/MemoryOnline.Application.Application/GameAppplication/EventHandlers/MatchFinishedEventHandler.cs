@@ -4,7 +4,7 @@ using MemoryOnline.Domain.Domain.MatchUseCases;
 using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Infraestructure.IRepository.Application;
 
-namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
+namespace MemoryOnline.Application.Application.GameAppplication.EventHandlers
 {
     public class MatchFinishedEventHandler : INotificationHandler<DomainEventNotificationAdaptor<MatchFinishedDomainEvent>>
     {
@@ -25,7 +25,7 @@ namespace MemoryOnline.Application.Users.UsersApplication.EventHandlers
 
             if (winnerId != System.Guid.Empty)
             {
-                UserResults results = new UserResults();
+                UserMatchResult results = new UserMatchResult();
                 results.MatchId = matchId;
                 results.Id = matchId;
                 results.Moves = 1;

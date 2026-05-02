@@ -17,7 +17,7 @@ namespace MemoryOnline.Infraestructure.EF.Application.Context
         {
             modelBuilder.Entity<Usuario>();
 
-            modelBuilder.Entity<UserResults>();
+            modelBuilder.Entity<UserMatchResult>();
 
             base.OnModelCreating(modelBuilder);
 

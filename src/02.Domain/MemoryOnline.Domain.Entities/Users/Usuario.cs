@@ -10,7 +10,7 @@ namespace MemoryOnline.Domain.Entities.Users
         public string Password { get; set; }
         public string ConnectionIdHub { get; set; }
 
-        public List<UserResults> Results { get; set; } 
+        public List<UserMatchResult> Results { get; set; } 
 
         public class Builder
         {
@@ -21,7 +21,7 @@ namespace MemoryOnline.Domain.Entities.Users
                 // Valores por defecto iniciales
                 _usuario.Id = Guid.NewGuid();
                 _usuario.ConnectionIdHub = "";
-                _usuario.Results = new List<UserResults>();
+                _usuario.Results = new List<UserMatchResult>();
             }
 
             public Builder WithId(Guid id)
@@ -54,7 +54,7 @@ namespace MemoryOnline.Domain.Entities.Users
                 return this;
             }
 
-            public Builder WithUserResults(List<UserResults> results)
+            public Builder WithUserResults(List<UserMatchResult> results)
             {
                 _usuario.Results = results;
                 return this;

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MemoryOnline.Domain.Entities.Stats
 {
-    public class UserResults
+    public class UserMatchResult
     {
         public Guid Id { get; set; }
         public Guid MatchId { get; set; }

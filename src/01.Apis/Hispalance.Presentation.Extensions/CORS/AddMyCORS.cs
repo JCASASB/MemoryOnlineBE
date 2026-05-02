@@ -29,6 +29,23 @@ namespace Hispalance.Presentation.Extensions.CORS
 
             return services;
         }
+
+        public static IServiceCollection AddMyCORSAddOrigins(this IServiceCollection services, IConfiguration configuration)
+        {
+            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins", policy =>
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+
+                });
+            });
+            return services;
+        }
     }
 
 

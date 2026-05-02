@@ -11,9 +11,9 @@ namespace MemoryOnline.Infraestructure.IRepository.Application
         Task AddUserAsync(Usuario entityToAdd);
 
 
-        Task<IEnumerable<UserResults>> GetUserResultsWithFilterAsync(ISpecification<Guid> spec);
+        Task<IEnumerable<UserMatchResult>> GetUserResultsWithFilterAsync(ISpecification<Guid> spec);
 
-        Task AddUserResultsAsync(UserResults results);
+        Task AddUserResultsAsync(UserMatchResult results);
 
 
     }

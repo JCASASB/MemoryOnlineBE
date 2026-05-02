@@ -1,5 +1,6 @@
 using MediatR;
 using MemoryOnline.Application.Users.UsersApplication.Queries.GetUser;
+using MemoryOnline.Domain.Entities.Stats;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MemoryOnline.Apis.WebApi.Controllers.ProfilesController
@@ -23,8 +24,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.ProfilesController
         [HttpGet("stats/{id}")]
         public async Task<IActionResult> GetUserStats(Guid id)
         {
-            var user = await _mediator.Send(new GetUserStatsQuery(id));
-            return Ok(user);
+            UserStats results = await _mediator.Send(new GetUserStatsQuery(id));
+            return Ok(results);
         }
 
         

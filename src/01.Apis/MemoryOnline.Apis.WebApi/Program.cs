@@ -9,8 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDependencyInjectionForWebApi();
 
-// CORS - Permitir todos los orígenes
-builder.Services.AddMyCORSAddAll();
+// CORS - Permitir los orígenes de la configuración
+builder.Services.AddMyCORSAddOrigins(builder.Configuration);
 
 builder.Services.AddControllersWithViews(); // Suport per a MVC o API
 

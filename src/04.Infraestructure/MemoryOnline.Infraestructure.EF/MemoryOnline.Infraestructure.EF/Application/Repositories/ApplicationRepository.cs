@@ -11,11 +11,11 @@ namespace MemoryOnline.Infraestructure.EF.Application.Repositories
 
         private readonly IGenericRepository<Usuario> _repository;
 
-        private readonly IGenericRepository<UserResults> _repositoryResults;
+        private readonly IGenericRepository<UserMatchResult> _repositoryResults;
 
         public ApplicationRepository(
             IGenericRepository<Usuario> repository
-            , IGenericRepository<UserResults> repositoryResults)
+            , IGenericRepository<UserMatchResult> repositoryResults)
         {
             _repository = repository;
 
@@ -29,7 +29,7 @@ namespace MemoryOnline.Infraestructure.EF.Application.Repositories
             await _repository.SaveChangesAsync();
         }
 
-        public async Task AddUserResultsAsync(UserResults results)
+        public async Task AddUserResultsAsync(UserMatchResult results)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace MemoryOnline.Infraestructure.EF.Application.Repositories
             }
         }
 
-        public Task<IEnumerable<UserResults>> GetUserResultsWithFilterAsync(ISpecification<Guid> spec)
+        public Task<IEnumerable<UserMatchResult>> GetUserResultsWithFilterAsync(ISpecification<Guid> spec)
         {
             return _repositoryResults.GetAllAsync();
         }

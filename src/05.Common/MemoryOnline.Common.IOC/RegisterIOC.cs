@@ -2,17 +2,16 @@
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Domain.IMatchUseCases;
 using MemoryOnline.Domain.Domain.MatchUseCases;
+using MemoryOnline.Domain.Domain.UserStatsUseCases;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MemoryOnline.Common.IOC
 {
     public static class RegisterIOC
     {
-        public static IServiceCollection AddDependencyInjectionForApplication(this IServiceCollection services)
+        public static IServiceCollection AddDependencyInjectionForGame(this IServiceCollection services)
         {
             // Repositorio y contexto EF Core InMemory
-           // services.AddGenericRepositoryConfiguration();
-
             // InMemory:
             //services.AddEFSqlServer();
             services.AddEFInMemory();
@@ -26,17 +25,16 @@ namespace MemoryOnline.Common.IOC
 
             services.AddScoped<ICreateMatchUseCase, CreateMatchUseCase>();
             services.AddScoped<IAddNewStateUseCase, AddNewStateUseCase>();
-
-            // Capa de aplicación
-           // services.AddScoped<UsersApplication>();
+            
             return services;
         }
-
 
         public static IServiceCollection AddDependencyInjectionForWebApi(this IServiceCollection services)
         {
             services.AddEFUsers();
             services.AddGenericDIConfiguration();
+
+            services.AddScoped<IGetUserStatsByIdUserUseCase, GetUserStatsByIdUserUseCase>();
 
             return services;
         }

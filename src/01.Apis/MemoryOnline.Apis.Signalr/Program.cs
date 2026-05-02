@@ -3,7 +3,7 @@ using MemoryOnline.Apis.Signalr;
 using MemoryOnline.Apis.Signalr.Hubs;
 using MemoryOnline.Apis.Utils;
 using MemoryOnline.Application.Application.GameAppplication.Commands.CreateMatch;
-using MemoryOnline.Application.Users.UsersApplication.EventHandlers;
+using MemoryOnline.Application.Application.GameAppplication.EventHandlers;
 using MemoryOnline.Common.IOC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -65,7 +65,7 @@ builder.Services.Configure<JwtBearerOptions>(
 # endregion
 
 // Registrar dependencias centralizadas (IOC)
-builder.Services.AddDependencyInjectionForApplication();
+builder.Services.AddDependencyInjectionForGame();
 
 // Registrar MediatR y handlers
 builder.Services.AddMediatR(cfg =>
