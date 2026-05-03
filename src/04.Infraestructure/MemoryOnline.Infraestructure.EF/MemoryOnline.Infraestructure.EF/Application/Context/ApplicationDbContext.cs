@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.EF.Application.Context
 {
-    public class ApplicationDbContext : DBContextInMemory
+    public class ApplicationDbContext : DBContextMongoDB
     {
         public ApplicationDbContext(IConfiguration config) : base(config)
         {
@@ -15,9 +15,22 @@ namespace MemoryOnline.Infraestructure.EF.Application.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Usuario>();
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(u => u.Id);
 
-            modelBuilder.Entity<UserMatchResult>();
+                // Definir la relación 1 a muchos
+                entity.HasMany(u => u.Results)         // Un Usuario tiene muchos Results
+                      .WithOne()                       // Cada Result pertenece a un Usuario
+                      .HasForeignKey("UsuarioId")      // EF creará esta Shadow Property en la DB
+                      .OnDelete(DeleteBehavior.Cascade); // Si borras al usuario, se borran sus resultados
+            });
+
+            modelBuilder.Entity<UserMatchResult>(entity =>
+            {
+                entity.HasKey(r => r.Id); // Asumiendo que UserMatchResult tiene un Id
+                entity.Property(r => r.UsuarioId).IsRequired();
+            });
 
             base.OnModelCreating(modelBuilder);
 

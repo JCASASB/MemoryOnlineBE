@@ -1,5 +1,4 @@
 ﻿using Hispalance.Infraestructure.DB.DBContext;
-using MemoryOnline.Domain.Entities;
 using MemoryOnline.Domain.Entities.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

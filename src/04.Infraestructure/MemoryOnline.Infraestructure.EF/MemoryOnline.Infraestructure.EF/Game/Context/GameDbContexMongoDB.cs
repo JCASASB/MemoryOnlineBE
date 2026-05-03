@@ -14,7 +14,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMongoDB("mongodb://admin:password123@localhost:27017", "gameDB");
+                optionsBuilder.UseMongoDB("mongodb://admin:password123@localhost:27017", "memoryDB");
             }
         }
 

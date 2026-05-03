@@ -6,9 +6,9 @@ namespace MemoryOnline.Application.Users.UsersApplication.Commands.Create
 {
     public class CreateUserHandler : IRequestHandler<CreateUserCommand, Usuario>
     {
-        private readonly IApplicationRepository _userRepository;
+        private readonly IApplicationUOW _userRepository;
 
-        public CreateUserHandler(IApplicationRepository userRepository)
+        public CreateUserHandler(IApplicationUOW userRepository)
         {
             _userRepository = userRepository;
         }

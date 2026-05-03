@@ -6,9 +6,9 @@ namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetAllUsers
 {
   public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, List<Usuario>>
     {
-        private readonly IApplicationRepository _userRepository;
+        private readonly IApplicationUOW _userRepository;
 
-        public GetAllUsersHandler(IApplicationRepository userRepository)
+        public GetAllUsersHandler(IApplicationUOW userRepository)
         {
             _userRepository = userRepository;
         }

@@ -60,7 +60,7 @@ namespace MemoryOnline.Common.IOC
             services.AddDbContext<ApplicationDbContext>();
 
             // 1. Registra la implementación concreta para su interfaz específica.
-            services.AddScoped<IApplicationRepository, ApplicationRepository>();
+            services.AddScoped<IApplicationUOW, ApplicationUOW>();
 
             return services;
         }

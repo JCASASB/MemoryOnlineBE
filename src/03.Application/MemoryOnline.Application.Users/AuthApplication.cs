@@ -6,9 +6,9 @@ namespace MemoryOnline.Application.Application
 {
     public class AuthApplication
     {
-        private readonly IApplicationRepository _userRepository;
+        private readonly IApplicationUOW _userRepository;
 
-        public AuthApplication(IApplicationRepository userRepository)
+        public AuthApplication(IApplicationUOW userRepository)
         {
             _userRepository = userRepository;
         }

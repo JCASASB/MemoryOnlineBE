@@ -8,9 +8,9 @@ namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
 {
     public class GetUserHandler : IRequestHandler<GetUserQuery, Usuario>
     {
-        private readonly IApplicationRepository _userRepository;
+        private readonly IApplicationUOW _userRepository;
 
-        public GetUserHandler(IApplicationRepository userRepository)
+        public GetUserHandler(IApplicationUOW userRepository)
         {
             _userRepository = userRepository;
         }

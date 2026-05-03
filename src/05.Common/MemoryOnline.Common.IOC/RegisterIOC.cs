@@ -9,13 +9,15 @@ namespace MemoryOnline.Common.IOC
 {
     public static class RegisterIOC
     {
+        /*
+         * Las usadas por el signalr
+         * */
         public static IServiceCollection AddDependencyInjectionForGame(this IServiceCollection services)
         {
             // Repositorio y contexto EF Core InMemory
-            // InMemory:
             //services.AddEFSqlServer();
-            services.AddEFInMemory();
-            //services.AddEFMongoDB();
+            //services.AddEFInMemory();
+            services.AddEFMongoDB();
 
             services.AddEFUsers();
             services.AddGenericDIConfiguration();

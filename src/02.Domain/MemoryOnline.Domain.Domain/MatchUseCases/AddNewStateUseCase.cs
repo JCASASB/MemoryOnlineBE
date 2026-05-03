@@ -13,7 +13,7 @@ namespace MemoryOnline.Domain.Domain.GameUseCases
 
             if (AreAllCardsMatched(newState))
             {
-                this.AddDomainEvent(new MatchFinishedDomainEvent(match.Id, newState));
+                this.AddDomainEvent(new MatchFinishedDomainEvent(match.Id));
             }
 
             return match;

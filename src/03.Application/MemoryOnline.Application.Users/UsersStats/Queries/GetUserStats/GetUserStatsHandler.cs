@@ -10,11 +10,11 @@ namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
 {
     public class GetUserStatsHandler : IRequestHandler<GetUserStatsQuery, UserStats>
     {
-        private readonly IApplicationRepository _appRepository;
+        private readonly IApplicationUOW _appRepository;
 
         private readonly IGetUserStatsByIdUserUseCase _getUserStatsByIdUserUseCase;
         
-        public GetUserStatsHandler(IApplicationRepository appRepository
+        public GetUserStatsHandler(IApplicationUOW appRepository
             , IGetUserStatsByIdUserUseCase getUserStatsByIdUserUseCase)
         {
             _appRepository = appRepository;
@@ -25,11 +25,12 @@ namespace MemoryOnline.Application.Users.UsersApplication.Queries.GetUser
         {
             try
             {
-                var user = await _appRepository.GetUserWithFilter(new UserResultsByUserIdSpec(request.id));
+                var results = await _appRepository.GetUserResultsWithFilterAsync(new UserResultsFilterByUserIdSpec(request.id));
                 
-                if(user.Count() > 0)
+
+                if(results.Count() > 0)
                 {
-                    var userStats = _getUserStatsByIdUserUseCase.Execute(user.First().Id, user.First().Results);
+                    var userStats = _getUserStatsByIdUserUseCase.Execute(results.First().UsuarioId, results);
                     return userStats;
                 }
 
