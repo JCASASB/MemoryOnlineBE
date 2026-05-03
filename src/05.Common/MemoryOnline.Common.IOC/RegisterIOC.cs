@@ -16,8 +16,8 @@ namespace MemoryOnline.Common.IOC
         {
             // Repositorio y contexto EF Core InMemory
             //services.AddEFSqlServer();
-            //services.AddEFInMemory();
-            services.AddEFMongoDB();
+            services.AddEFInMemory();
+            //services.AddEFMongoDB();
 
             services.AddEFUsers();
             services.AddGenericDIConfiguration();

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.EF.Application.Context
 {
-    public class ApplicationDbContext : DBContextMongoDB
+    public class ApplicationDbContext : DBContextInMemory
     {
         public ApplicationDbContext(IConfiguration config) : base(config)
         {
