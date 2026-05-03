@@ -1,15 +1,15 @@
 ﻿using Hispalance.Infraestructure.DB.DBContext;
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class GameDbContext : DBContextMongoDB
+    public class GameDbContext : DBContextInMemory, IGameDbContext
     {
         public DbSet<Match> Matches { get; set; }
-
 
         public GameDbContext(IConfiguration config) : base(config)
         {

@@ -1,21 +1,32 @@
-ï»¿using Microsoft.EntityFrameworkCore;
+using MemoryOnline.Infraestructure.IRepository.Game;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Hispalance.Infraestructure.DB.DBContext
+namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
 {
-    public class DBContextSqlServer : DBContextMyBase
+    public class GameDbContextSqlServer : GameDbContextBase
     {
-        public DBContextSqlServer(IConfiguration config) : base(config)
+        public GameDbContextSqlServer(DbContextOptions<GameDbContextSqlServer> options, IConfiguration config) : base(options, config)
         {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
 
-            optionsBuilder.UseSqlServer(_connectionString);
+                // 2. Muestra los valores de los parámetros en las consultas SQL (crucial para debug)
+                .EnableSensitiveDataLogging()
 
-            base.OnConfiguring(optionsBuilder);
+                // 3. Proporciona excepciones mucho más detalladas si falla la lectura de datos
+                .EnableDetailedErrors();
+
+                optionsBuilder.UseSqlServer(_connectionString);
+
+                base.OnConfiguring(optionsBuilder);
+            }
         }
 
         protected override string GetConnectionString()
@@ -39,5 +50,4 @@ namespace Hispalance.Infraestructure.DB.DBContext
             }
         }
     }
-}
-
+    }

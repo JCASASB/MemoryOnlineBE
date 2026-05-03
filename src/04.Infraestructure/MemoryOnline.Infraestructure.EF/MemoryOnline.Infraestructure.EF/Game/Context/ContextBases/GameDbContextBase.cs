@@ -1,23 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace Hispalance.Infraestructure.DB.DBContext
+namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
 {
-    public class DBContextMyBase : DbContext
+    public abstract class GameDbContextBase : DbContext
     {
-        #region properties
         protected IConfiguration _config;
-
         protected string _connectionString;
-        #endregion
 
-        public DBContextMyBase(IConfiguration config) 
+        protected GameDbContextBase(DbContextOptions options, IConfiguration config) : base(options)
         {
             _config = config;
             _connectionString = GetConnectionString();
-
         }
 
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
 
         protected virtual string GetConnectionString()
         {

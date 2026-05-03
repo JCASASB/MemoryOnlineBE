@@ -1,21 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
+using MemoryOnline.Infraestructure.IRepository.Game;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
-namespace Hispalance.Infraestructure.DB.DBContext
+namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
 {
-    public class DBContextSqlServer : DBContextMyBase
+    public class GameDbContexMongoDB : GameDbContextBase
     {
-        public DBContextSqlServer(IConfiguration config) : base(config)
+        private string _database;
+
+        public GameDbContexMongoDB(DbContextOptions<GameDbContexMongoDB> options, IConfiguration config) : base(options, config)
         {
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMongoDB(_connectionString, _database);
 
-            optionsBuilder.UseSqlServer(_connectionString);
-
-            base.OnConfiguring(optionsBuilder);
+                base.OnConfiguring(optionsBuilder);
+            }
         }
 
         protected override string GetConnectionString()
@@ -27,8 +33,10 @@ namespace Hispalance.Infraestructure.DB.DBContext
                 var database = _config.GetSection("DBSection:Database").Value;
                 var user = _config.GetSection("DBSection:User").Value;
                 var pass = _config.GetSection("DBSection:Password").Value;
-                var connectionString = String.Format("Server={0},{1};Database={2};User Id={3};Password={4};TrustServerCertificate=True;",
-                    server, port, database, user, pass);
+
+                var connectionString = $"mongodb://{user}:{pass}@{server}:{port}";
+
+                _database = database;
 
                 return connectionString;
             }
@@ -40,4 +48,3 @@ namespace Hispalance.Infraestructure.DB.DBContext
         }
     }
 }
-

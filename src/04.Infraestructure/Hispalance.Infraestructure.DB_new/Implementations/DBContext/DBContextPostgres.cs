@@ -7,7 +7,6 @@ namespace Hispalance.Infraestructure.DB.DBContext
     {
         public DBContextPostgres(IConfiguration config) : base(config)
         {
-            _connectionString = GetConnectionString();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

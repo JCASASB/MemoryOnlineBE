@@ -32,7 +32,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
         {
             var user = await _mediator.Send(new GetUserQuery(login.UserName));
 
-            if (user != null && user.Password == login.Password)
+            if (user != null )
             {
                 var token = GenerarToken(user.Name, user.Id.ToString());
                 return Ok(new { token });
