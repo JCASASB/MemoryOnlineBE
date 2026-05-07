@@ -5,23 +5,27 @@ namespace MemoryOnline.Domain.Entities.Users
     public class Usuario
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public int Age { get; set; }
-        public string Password { get; set; }
-        public string ConnectionIdHub { get; set; }
+        public required string Password { get; set; }
+        public required string ConnectionIdHub { get; set; }
 
-        public List<UserMatchResult> Results { get; set; } 
+        public required List<UserMatchResult> Results { get; set; } 
 
         public class Builder
         {
-            private readonly Usuario _usuario = new Usuario();
+            private readonly Usuario _usuario = new Usuario
+            {
+                Name = string.Empty,
+                Password = string.Empty,
+                ConnectionIdHub = string.Empty,
+                Results = new List<UserMatchResult>()
+            };
 
             public Builder()
             {
                 // Valores por defecto iniciales
                 _usuario.Id = Guid.NewGuid();
-                _usuario.ConnectionIdHub = "";
-                _usuario.Results = new List<UserMatchResult>();
             }
 
             public Builder WithId(Guid id)

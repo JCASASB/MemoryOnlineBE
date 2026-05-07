@@ -15,6 +15,6 @@ namespace MemoryOnline.Domain.Entities.Game
         [Key]
         public Guid Id { get; set; }
 
-        public List<BoardState> States { get; set; }
+        public required List<BoardState> States { get; set; }
     }
 }

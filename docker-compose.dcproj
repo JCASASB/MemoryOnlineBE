@@ -4,22 +4,20 @@
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>81dded9d-158b-e303-5f62-77a2896d2a5a</ProjectGuid>
+    <DockerComposeBaseFilePath>docker\docker-compose</DockerComposeBaseFilePath>
   </PropertyGroup>
   <ItemGroup>
-    <None Include=".github\docs\CLOUDFLARE_TUNNEL_SETUP.md" />
-    <None Include=".github\scripts\deploy.sh" />
-    <None Include=".github\workflows\deploy-ec2.yml" />
-    <None Include="docker-compose.override.yml">
-      <DependentUpon>docker-compose.yml</DependentUpon>
-    </None>
-    <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
-    <None Include="README.md" />
-    <None Include="src\04.Infraestructure\MemoryOnline.Infraestructure.GenericEF\GameRepository.cs" />
-    <None Include="src\04.Infraestructure\MemoryOnline.Infraestructure.GenericEF\MemoryOnline.Infraestructure.GenericEF.csproj" />
+    <None Remove=".github\**" />
+    <None Remove="docs\**" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="scripts\" />
-    <Folder Include="src\04.Infraestructure\MemoryOnline.Infraestructure.IRepository\" />
+    <None Include="docker\docker-compose.override.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include=".dockerignore" />
+    <None Include="docker\docker-compose.yml" />
+    <None Include="docker\grafana\provisioning\datasources\datasources.yml" />
+    <None Include="docker\otel-collector-config.yml" />
+    <None Include="docker\tempo.yml" />
   </ItemGroup>
 </Project>

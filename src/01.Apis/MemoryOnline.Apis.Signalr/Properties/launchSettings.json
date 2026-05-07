@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "http": {
+    "mi_deputacion_local": {
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

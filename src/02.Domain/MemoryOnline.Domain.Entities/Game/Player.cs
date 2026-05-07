@@ -13,7 +13,7 @@ namespace MemoryOnline.Domain.Entities.Game
         [BsonElement("Id")]  // Esto cambia el nombre en JSON a "Id"
         [BsonRepresentation(BsonType.String)]
         public Guid Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public required string Name { get; set; } = string.Empty;
         public int Order { get; set; }
         public int RemainMoves { get; set; }
         public int TotalMoves { get; set; }
