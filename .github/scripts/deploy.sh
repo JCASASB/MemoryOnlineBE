@@ -22,6 +22,24 @@ WEBAPI_IMAGE="memoryonline-webapi"
 WEBAPI_PORT=5001
 WEBAPI_SUBDOMAIN="api.${BASE_DOMAIN}"
 
+# Configuración de Monitoring
+OTEL_CONTAINER="otel-collector"
+OTEL_IMAGE="memoryonline-otel"
+OTEL_PORT_1=4317
+OTEL_PORT_2=4318
+
+TEMPO_CONTAINER="tempo"
+TEMPO_IMAGE="grafana/tempo:latest"
+TEMPO_PORT=3200
+
+LOKI_CONTAINER="loki"
+LOKI_IMAGE="grafana/loki:3.0.0"
+LOKI_PORT=3100
+
+GRAFANA_CONTAINER="grafana"
+GRAFANA_IMAGE="grafana/grafana:latest"
+GRAFANA_PORT=3000
+
 echo "🚀 Iniciando deploy"
 echo "   SignalR: https://$SIGNALR_SUBDOMAIN"
 echo "   WebApi:  https://$WEBAPI_SUBDOMAIN"
@@ -115,6 +133,8 @@ deploy_container() {
     local IMAGE_NAME=$2
     local PORT=$3
     local IMAGE_FILE=$4
+    local ENV_VARS=$5
+    local EXTRA_ARGS=$6
 
     echo ""
     echo "🐳 Desplegando: $CONTAINER_NAME"
@@ -122,42 +142,71 @@ deploy_container() {
     if [ -f "/home/$EC2_USER/$IMAGE_FILE" ]; then
         echo "   📦 Cargando imagen..."
         sudo docker load -i /home/$EC2_USER/$IMAGE_FILE
-        
-        echo "   🛑 Deteniendo contenedor anterior..."
-        sudo docker stop $CONTAINER_NAME 2>/dev/null || true
-        sudo docker rm $CONTAINER_NAME 2>/dev/null || true
-
-        echo "   🚀 Iniciando contenedor..."
-        sudo docker run -d \
-            --name $CONTAINER_NAME \
-            --restart unless-stopped \
-            -p $PORT:8080 \
-            -e ASPNETCORE_ENVIRONMENT=Production \
-            -e ASPNETCORE_URLS="http://+:8080" \
-            $IMAGE_NAME:latest
-
-        rm -f /home/$EC2_USER/$IMAGE_FILE
-        echo "   ✅ $CONTAINER_NAME desplegado en puerto $PORT"
-    else
-        echo "   ⚠️  Archivo $IMAGE_FILE no encontrado, saltando..."
     fi
+        
+    echo "   🛑 Deteniendo contenedor anterior..."
+    sudo docker stop $CONTAINER_NAME 2>/dev/null || true
+    sudo docker rm $CONTAINER_NAME 2>/dev/null || true
+
+    echo "   🚀 Iniciando contenedor..."
+    sudo docker run -d \
+        --name $CONTAINER_NAME \
+        --network host \
+        --restart unless-stopped \
+        $ENV_VARS \
+        $EXTRA_ARGS \
+        $IMAGE_NAME:latest
+
+    if [ -f "/home/$EC2_USER/$IMAGE_FILE" ]; then
+        rm -f /home/$EC2_USER/$IMAGE_FILE
+    fi
+    echo "   ✅ $CONTAINER_NAME desplegado"
 }
 
-# ===========================================
-# 5. Deploy de ambos servicios
-# ===========================================
-deploy_container "$SIGNALR_CONTAINER" "$SIGNALR_IMAGE" "$SIGNALR_PORT" "signalr-image.tar.gz"
-deploy_container "$WEBAPI_CONTAINER" "$WEBAPI_IMAGE" "$WEBAPI_PORT" "webapi-image.tar.gz"
+# Crear network si no existe
+sudo docker network create app-network 2>/dev/null || true
 
 # ===========================================
-# 6. Limpieza
+# 5. Deploy del stack de monitoreo
+# ===========================================
+echo "📊 Desplegando Stack de Monitoreo..."
+
+# Tempo
+sudo docker stop $TEMPO_CONTAINER 2>/dev/null || true
+sudo docker rm $TEMPO_CONTAINER 2>/dev/null || true
+sudo docker run -d --name $TEMPO_CONTAINER --network app-network --restart unless-stopped -p $TEMPO_PORT:3200 -p 4317 -v /home/$EC2_USER/tempo.yml:/etc/tempo.yml $TEMPO_IMAGE -config.file=/etc/tempo.yml
+
+# Loki
+sudo docker stop $LOKI_CONTAINER 2>/dev/null || true
+sudo docker rm $LOKI_CONTAINER 2>/dev/null || true
+sudo docker run -d --name $LOKI_CONTAINER --network app-network --restart unless-stopped -p $LOKI_PORT:3100 $LOKI_IMAGE -config.file=/etc/loki/local-config.yaml
+
+# Grafana
+sudo docker stop $GRAFANA_CONTAINER 2>/dev/null || true
+sudo docker rm $GRAFANA_CONTAINER 2>/dev/null || true
+sudo bash -c "sudo chmod -R 777 /home/$EC2_USER/grafana" # Permisos para volumen de grafana
+sudo docker run -d --name $GRAFANA_CONTAINER --network app-network --restart unless-stopped -p $GRAFANA_PORT:3000 -v /home/$EC2_USER/grafana/provisioning:/etc/grafana/provisioning -e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=admin $GRAFANA_IMAGE
+
+# Otel Collector (de la imagen que construimos)
+deploy_container "$OTEL_CONTAINER" "$OTEL_IMAGE" "$OTEL_PORT_1" "otel-image.tar.gz" "" "-p 4317:4317 -p 4318:4318 --network app-network"
+
+# ===========================================
+# 6. Deploy de ambos servicios (SignalR y WebApi)
+# ===========================================
+ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080 -e OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317"
+
+deploy_container "$SIGNALR_CONTAINER" "$SIGNALR_IMAGE" "$SIGNALR_PORT" "signalr-image.tar.gz" "$ENV_API" "-p $SIGNALR_PORT:8080 --network app-network"
+deploy_container "$WEBAPI_CONTAINER" "$WEBAPI_IMAGE" "$WEBAPI_PORT" "webapi-image.tar.gz" "$ENV_API" "-p $WEBAPI_PORT:8080 --network app-network"
+
+# ===========================================
+# 7. Limpieza
 # ===========================================
 echo ""
 echo "🧹 Limpiando imágenes no utilizadas..."
 sudo docker image prune -f
 
 # ===========================================
-# 7. Diagnóstico
+# 8. Diagnóstico
 # ===========================================
 echo ""
 echo "========== 📊 DIAGNÓSTICO FINAL =========="
