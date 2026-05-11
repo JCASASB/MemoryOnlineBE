@@ -105,6 +105,11 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
     # Detener servicio existente si está corriendo
     sudo systemctl stop cloudflared 2>/dev/null || true
 
+    # Desinstalar servicio existente si existe para poder instalarlo nuevamente con el token
+    if [ -f "/etc/systemd/system/cloudflared.service" ]; then
+        sudo cloudflared service uninstall
+    fi
+
     # Instalar/reinstalar el servicio con el token
     sudo cloudflared service install "$CLOUDFLARE_TOKEN"
 
