@@ -106,7 +106,7 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
     sudo systemctl stop cloudflared 2>/dev/null || true
 
     # Instalar/reinstalar el servicio con el token
-    sudo cloudflared service install --token "$CLOUDFLARE_TOKEN"
+    sudo cloudflared service install "$CLOUDFLARE_TOKEN"
 
     # Iniciar y habilitar el servicio
     sudo systemctl start cloudflared
