@@ -151,7 +151,6 @@ deploy_container() {
     echo "   🚀 Iniciando contenedor..."
     sudo docker run -d \
         --name $CONTAINER_NAME \
-        --network host \
         --restart unless-stopped \
         $ENV_VARS \
         $EXTRA_ARGS \
