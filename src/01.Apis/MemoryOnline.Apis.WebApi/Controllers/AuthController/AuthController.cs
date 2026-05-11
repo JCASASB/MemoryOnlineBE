@@ -31,6 +31,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
         public async Task<IActionResult> Login([FromBody] LoginUserDto login)
         {
             var user = await _mediator.Send(new GetUserQuery(login.UserName));
+            
+            _logger.LogInformation("Entrando en login2");
 
             if (user != null )
             {
@@ -39,6 +41,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
             }
             //si no existe, de momento lo creamos para que funcione en desarrollo
             else {
+                _logger.LogInformation($"Creando el usuario {login.UserName}");
+
                 var newUser = await _mediator.Send(new CreateUserCommand(login.UserName, login.Password));
 
                     var token = GenerarToken(newUser.Name, newUser.Id.ToString());

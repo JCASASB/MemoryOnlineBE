@@ -13,7 +13,7 @@ namespace MemoryOnline.Domain.Entities.Game
         [BsonRepresentation(BsonType.String)]
         public Guid Id { get; set; }
         public int Value { get; set; }
-        public string ImgUrl { get; set; } = string.Empty;
+        public required string ImgUrl { get; set; } = string.Empty;
         public EnumCardState State { get; set; }
     }
 }

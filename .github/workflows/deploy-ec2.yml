@@ -68,12 +68,28 @@ jobs:
           docker build --platform linux/arm64 -t memoryonline-webapi:latest .
 
       # ===========================================
+      # >. Construir imagen de Otel Collector (Custom con config)
+      # ===========================================
+      - name: Build Docker image - OtelCollector
+        run: |
+          mkdir -p ./otel
+          cp docker/otel-collector-config.yml ./otel/
+          cd ./otel
+          echo "FROM otel/opentelemetry-collector:latest" > Dockerfile
+          echo "COPY otel-collector-config.yml /etc/otel-collector-config.yml" >> Dockerfile
+          echo 'CMD ["--config=/etc/otel-collector-config.yml"]' >> Dockerfile
+          docker build --platform linux/arm64 -t memoryonline-otel:latest .
+
+      # ===========================================
       # 4. Exportar imágenes
       # ===========================================
       - name: Exportar imágenes Docker
         run: |
           docker save memoryonline-signalr:latest | gzip > signalr-image.tar.gz
           docker save memoryonline-webapi:latest | gzip > webapi-image.tar.gz
+          docker save memoryonline-otel:latest | gzip > otel-image.tar.gz
+          
+          # También exportamos la imagen de loki, tempo, y grafana si son personalizadas o para cargarlas, pero usualmente se hace pull en la máquina destino si no hay cambios. Exportaremos sólo otel de momento.
 
       # ===========================================
       # 5. Configurar SSH
@@ -98,6 +114,9 @@ jobs:
           echo "📤 Subiendo archivos a /home/$EC2_USER/ ..."
           scp signalr-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           scp webapi-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp otel-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp docker/tempo.yml ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp -r docker/grafana ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           scp .github/scripts/deploy.sh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           echo "✅ Archivos subidos"
 

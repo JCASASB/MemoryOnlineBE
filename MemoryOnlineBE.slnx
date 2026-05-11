@@ -1,6 +1,8 @@
 <Solution>
-  <Folder Name="/Elementos de la solución/">
-    <File Path="Readme.txt" />
+  <Folder Name="/docs/">
+    <File Path="docs/README.md" />
+    <File Path="docs/Readme.txt" />
+    <File Path="docs/ReadmeApp.txt" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/01.Apis/">

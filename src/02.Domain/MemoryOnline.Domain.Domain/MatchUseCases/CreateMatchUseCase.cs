@@ -7,7 +7,7 @@ namespace MemoryOnline.Domain.Domain.MatchUseCases
     {
         public Match Execute(BoardState initialState, Guid matchId)
         {
-            Match match = new Match();
+            Match match = new Match() { States = new() };
             match.Id = matchId;
             match.States = new List<BoardState> { initialState };
 
