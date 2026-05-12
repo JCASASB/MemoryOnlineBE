@@ -108,6 +108,8 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
     # Desinstalar servicio existente si existe para poder instalarlo nuevamente con el token
     if [ -f "/etc/systemd/system/cloudflared.service" ]; then
         sudo cloudflared service uninstall
+        # Recargar los demonios de systemd para limpiar el estado anterior
+        sudo systemctl daemon-reload
     fi
 
     # Instalar/reinstalar el servicio con el token
