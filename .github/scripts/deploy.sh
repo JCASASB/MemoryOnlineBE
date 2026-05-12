@@ -112,17 +112,24 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
         sudo systemctl daemon-reload
     fi
 
-    # Instalar/reinstalar el servicio con el token
-    sudo cloudflared service install "$CLOUDFLARE_TOKEN"
+    # Instalar/reinstalar el servicio con el token, forzando la creación de errores amigables si falla
+    if ! sudo cloudflared service install "$CLOUDFLARE_TOKEN"; then
+        echo "⚠️  Cloudflared install reportó un problema o requirió recarga manual."
+    fi
+    sudo systemctl daemon-reload
 
-    # Iniciar y habilitar el servicio, pero no fallar si hay problemas de inicio, e imprimir logs
-    sudo systemctl enable cloudflared
-    sudo systemctl start cloudflared || {
-        echo "❌ Fallo al iniciar el servicio cloudflared."
-        echo "🔍 Últimos logs de systemd (journalctl):"
+    # Iniciar y habilitar el servicio, manejando el posible fallo de start explícitamente
+    sudo systemctl enable cloudflared.service || true
+    if ! sudo systemctl start cloudflared.service; then
+        echo "❌ Fallo al iniciar el servicio cloudflared. Error de systemd."
+        echo "🔍 Últimos logs de journalctl para cloudflared:"
         sudo journalctl -xeu cloudflared.service --no-pager | tail -n 50
+
+        echo "🔍 Estado actual del servicio cloudflared:"
+        sudo systemctl status cloudflared.service --no-pager || true
+
         exit 1
-    }
+    fi
 
     echo "✅ Túnel de Cloudflare configurado y iniciado"
 else
