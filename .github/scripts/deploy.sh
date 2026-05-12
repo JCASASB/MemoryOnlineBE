@@ -115,9 +115,14 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
     # Instalar/reinstalar el servicio con el token
     sudo cloudflared service install "$CLOUDFLARE_TOKEN"
 
-    # Iniciar y habilitar el servicio
-    sudo systemctl start cloudflared
+    # Iniciar y habilitar el servicio, pero no fallar si hay problemas de inicio, e imprimir logs
     sudo systemctl enable cloudflared
+    sudo systemctl start cloudflared || {
+        echo "❌ Fallo al iniciar el servicio cloudflared."
+        echo "🔍 Últimos logs de systemd (journalctl):"
+        sudo journalctl -xeu cloudflared.service --no-pager | tail -n 50
+        exit 1
+    }
 
     echo "✅ Túnel de Cloudflare configurado y iniciado"
 else

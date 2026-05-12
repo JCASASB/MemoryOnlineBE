@@ -40,7 +40,8 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
                 return Ok(new { token });
             }
             //si no existe, de momento lo creamos para que funcione en desarrollo
-            else {
+            else if(login.UserName == "aaa" || login.UserName == "bbb")
+            {
                 _logger.LogInformation($"Creando el usuario {login.UserName}");
 
                 var newUser = await _mediator.Send(new CreateUserCommand(login.UserName, login.Password));
