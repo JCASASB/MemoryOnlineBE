@@ -11,6 +11,7 @@
     <None Remove="docs\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="docker\.env" />
     <None Include="docker\docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>

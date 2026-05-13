@@ -88,6 +88,10 @@ yarn-error.log
 package-lock.json
 .pnpm-debug.log
 
+# Docker
+docker/.env
+.env
+
 # Temporary files
 *.tmp
 *.temp

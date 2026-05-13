@@ -89,8 +89,6 @@ jobs:
           docker save memoryonline-webapi:latest | gzip > webapi-image.tar.gz
           docker save memoryonline-otel:latest | gzip > otel-image.tar.gz
           
-          # También exportamos la imagen de loki, tempo, y grafana si son personalizadas o para cargarlas, pero usualmente se hace pull en la máquina destino si no hay cambios. Exportaremos sólo otel de momento.
-
       # ===========================================
       # 5. Configurar SSH
       # ===========================================
@@ -115,8 +113,6 @@ jobs:
           scp signalr-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           scp webapi-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           scp otel-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
-          scp docker/tempo.yml ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
-          scp -r docker/grafana ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           scp .github/scripts/deploy.sh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
           echo "✅ Archivos subidos"
 

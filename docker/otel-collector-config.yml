@@ -10,22 +10,33 @@ processors:
   batch:
 
 exporters:
-  otlp/tempo:
-    endpoint: "tempo:4317"
+  # Exportador OTLP hacia Grafana Cloud usando HTTP estándar (por puerto 443 para evitar bloqueos)
+  otlphttp/grafanacloud:
+    endpoint: "${GRAFANA_ENDPOINT}"
+    headers:
+      Authorization: "Basic ${GRAFANA_CLOUD_TOKEN}"
+
+  # Por defecto no enviamos trazas a ningún lado ya que Tempo está en local 
+  # pero si tuvieras una IP pública de tu local aquí iría
+  otlp_grpc/tempo:
+    endpoint: "host.docker.internal:4317"
     tls:
       insecure: true
-  
-  # Fíjate bien en este nombre: otlphttp (sin guion bajo)
+
   otlphttp/loki:
-    endpoint: "http://loki:3100/otlp"
+    endpoint: "http://host.docker.internal:3100/otlp"
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/tempo]
+      exporters: [otlphttp/grafanacloud] 
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlphttp/loki] # <-- Aquí debe decir lo mismo que arriba
+      exporters: [otlphttp/grafanacloud]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/grafanacloud]

@@ -28,18 +28,6 @@ OTEL_IMAGE="memoryonline-otel"
 OTEL_PORT_1=4317
 OTEL_PORT_2=4318
 
-TEMPO_CONTAINER="tempo"
-TEMPO_IMAGE="grafana/tempo:latest"
-TEMPO_PORT=3200
-
-LOKI_CONTAINER="loki"
-LOKI_IMAGE="grafana/loki:3.0.0"
-LOKI_PORT=3100
-
-GRAFANA_CONTAINER="grafana"
-GRAFANA_IMAGE="grafana/grafana:latest"
-GRAFANA_PORT=3000
-
 echo "🚀 Iniciando deploy"
 echo "   SignalR: https://$SIGNALR_SUBDOMAIN"
 echo "   WebApi:  https://$WEBAPI_SUBDOMAIN"
@@ -185,25 +173,9 @@ deploy_container() {
 sudo docker network create app-network 2>/dev/null || true
 
 # ===========================================
-# 5. Deploy del stack de monitoreo
+# 5. Deploy del stack de monitoreo (Solo Otel Collector)
 # ===========================================
 echo "📊 Desplegando Stack de Monitoreo..."
-
-# Tempo
-sudo docker stop $TEMPO_CONTAINER 2>/dev/null || true
-sudo docker rm $TEMPO_CONTAINER 2>/dev/null || true
-sudo docker run -d --name $TEMPO_CONTAINER --network app-network --restart unless-stopped -p $TEMPO_PORT:3200 -p 4317 -v /home/$EC2_USER/tempo.yml:/etc/tempo.yml $TEMPO_IMAGE -config.file=/etc/tempo.yml
-
-# Loki
-sudo docker stop $LOKI_CONTAINER 2>/dev/null || true
-sudo docker rm $LOKI_CONTAINER 2>/dev/null || true
-sudo docker run -d --name $LOKI_CONTAINER --network app-network --restart unless-stopped -p $LOKI_PORT:3100 $LOKI_IMAGE -config.file=/etc/loki/local-config.yaml
-
-# Grafana
-sudo docker stop $GRAFANA_CONTAINER 2>/dev/null || true
-sudo docker rm $GRAFANA_CONTAINER 2>/dev/null || true
-sudo bash -c "sudo chmod -R 777 /home/$EC2_USER/grafana" # Permisos para volumen de grafana
-sudo docker run -d --name $GRAFANA_CONTAINER --network app-network --restart unless-stopped -p $GRAFANA_PORT:3000 -v /home/$EC2_USER/grafana/provisioning:/etc/grafana/provisioning -e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=admin $GRAFANA_IMAGE
 
 # Otel Collector (de la imagen que construimos)
 deploy_container "$OTEL_CONTAINER" "$OTEL_IMAGE" "$OTEL_PORT_1" "otel-image.tar.gz" "" "-p 4317:4317 -p 4318:4318 --network app-network"
