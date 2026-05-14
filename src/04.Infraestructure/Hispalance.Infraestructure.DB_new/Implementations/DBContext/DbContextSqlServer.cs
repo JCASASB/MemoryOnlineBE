@@ -5,7 +5,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
 {
     public class DBContextSqlServer : DBContextMyBase
     {
-        public DBContextSqlServer(IConfiguration config) : base(config)
+        public DBContextSqlServer(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 
@@ -13,7 +13,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
         {
             //NECESITO HACER ALGO PARA QUE el addmigration funcione cuando tiene dependency injection . ahora no va,
 
-            optionsBuilder.UseSqlServer(_connectionString);
+            optionsBuilder.UseSqlServer(_connectionString, sqlOptions => sqlOptions.EnableRetryOnFailure());
 
             base.OnConfiguring(optionsBuilder);
         }

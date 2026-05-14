@@ -5,7 +5,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
 {
     public class DBContextPostgres : DBContextMyBase
     {
-        public DBContextPostgres(IConfiguration config) : base(config)
+        public DBContextPostgres(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 

@@ -19,3 +19,9 @@ memoryec2.hispalance.com
 signalr.hispalance.com
 api.hispalance.com
 grafana.hispalance.com
+
+
+
+podman compose -f docker/docker-compose.yml -f docker/mongodb-compose.yml up -d
+podman compose -f docker/mongodb-compose.yml up -d
+podman compose -f docker/sqlserverdb-compose.yml up -d

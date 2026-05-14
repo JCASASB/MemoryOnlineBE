@@ -5,7 +5,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
 {
     public class DBContextInMemory : DBContextMyBase
     {
-        public DBContextInMemory(IConfiguration config) : base(config)
+        public DBContextInMemory(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 

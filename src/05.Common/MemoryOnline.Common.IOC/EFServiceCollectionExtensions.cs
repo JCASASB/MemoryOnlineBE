@@ -1,13 +1,10 @@
 using Hispalance.Infraestructure.DB.IRepositories.Generic;
 using Hispalance.Infraestructure.DB.Repositories.EF;
-using MemoryOnline.Infraestructure.EF.Application.Context;
 using MemoryOnline.Infraestructure.EF.Application.Repositories;
 using MemoryOnline.Infraestructure.EF.Game.Context;
-using MemoryOnline.Infraestructure.EF.Game.Context.ContextBases;
 using MemoryOnline.Infraestructure.EF.Game.Repositories;
 using MemoryOnline.Infraestructure.IRepository.Application;
 using MemoryOnline.Infraestructure.IRepository.Game;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MemoryOnline.Common.IOC
@@ -31,7 +28,7 @@ namespace MemoryOnline.Common.IOC
 
         public static IServiceCollection AddEFUsers(this IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>();
+            services.AddDbContext<GameDbContext>();
 
             // 1. Registra la implementación concreta para su interfaz específica.
             services.AddScoped<IApplicationUOW, ApplicationUOW>();
@@ -52,16 +49,16 @@ namespace MemoryOnline.Common.IOC
 
     internal class UsersGenericRepositoryEF<TEntity> : GenericRepositoryEF<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEF(ApplicationDbContext context) : base(context) { }
+        public UsersGenericRepositoryEF(GameDbContext context) : base(context) { }
     }
 
     internal class UsersGenericRepositoryEFRead<TEntity> : GenericRepositoryEFRead<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEFRead(ApplicationDbContext context) : base(context) { }
+        public UsersGenericRepositoryEFRead(GameDbContext context) : base(context) { }
     }
 
     internal class UsersGenericRepositoryEFWrite<TEntity> : GenericRepositoryEFWrite<TEntity> where TEntity : class
     {
-        public UsersGenericRepositoryEFWrite(ApplicationDbContext context) : base(context) { }
+        public UsersGenericRepositoryEFWrite(GameDbContext context) : base(context) { }
     }
 }

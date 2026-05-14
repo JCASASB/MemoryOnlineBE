@@ -1,44 +1,26 @@
 ﻿using Hispalance.Infraestructure.DB.DBContext;
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Stats;
+using MemoryOnline.Domain.Entities.Users;
+using MemoryOnline.Infraestructure.EF.Game.Context.ContextBases;
 using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class GameDbContext : DBContextInMemory, IGameDbContext
+    public class GameDbContext : GameDbContextInMemory, IGameDbContext
     {
         public DbSet<Match> Matches { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<UserMatchResult> UsuarioResults { get; set; }
 
-        public GameDbContext(IConfiguration config) : base(config)
+        public GameDbContext(DbContextOptions options, IConfiguration config) : base(options, config)
         {
+           // Database.EnsureDeleted(); // Agregado para forzar la eliminación de la BD obsoleta
             Database.EnsureCreated();
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Match>(entity =>
-            {
-                entity.ToCollection("Matches");
-                entity.HasKey(m => m.Id);
-
-                // CONFIGURACIÓ PER A MONGODB
-                entity.OwnsMany(m => m.States, state =>
-                {
-                    // 1. ELIMINA EL .HasKey(). En Mongo, els elements de la llista 
-                    // es tracten com a objectes sense identitat pròpia per a EF Core.
-
-                    // 2. Que l'ID es guardi com a string o Guid normal:
-                    state.Property(s => s.Id).ValueGeneratedNever();
-
-                    // 3. Configurem els sub-nivells (també sense HasKey)
-                    state.OwnsMany(s => s.Cards);
-                    state.OwnsMany(s => s.Players);
-                });
-            });
-        }
+        
     }
 }

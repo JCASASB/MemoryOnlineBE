@@ -11,11 +11,10 @@ namespace Hispalance.Infraestructure.DB.DBContext
         protected string _connectionString;
         #endregion
 
-        public DBContextMyBase(IConfiguration config) 
+        public DBContextMyBase(DbContextOptions options, IConfiguration config) : base(options)
         {
             _config = config;
             _connectionString = GetConnectionString();
-
         }
 
 

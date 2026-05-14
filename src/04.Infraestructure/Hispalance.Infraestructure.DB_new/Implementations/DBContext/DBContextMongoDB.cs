@@ -7,7 +7,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
     {
         private string _database;
 
-        public DBContextMongoDB(IConfiguration config) : base(config)
+        public DBContextMongoDB(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 

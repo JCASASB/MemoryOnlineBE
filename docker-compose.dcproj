@@ -18,6 +18,8 @@
     <None Include=".dockerignore" />
     <None Include="docker\docker-compose.yml" />
     <None Include="docker\grafana\provisioning\datasources\datasources.yml" />
+    <None Include="docker\sqlserverdb-compose.yml" />
+    <None Include="docker\mongodb-compose.yml" />
     <None Include="docker\otel-collector-config.yml" />
     <None Include="docker\tempo.yml" />
   </ItemGroup>

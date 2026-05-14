@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Application\Context\" />
+  </ItemGroup>
+
 </Project>

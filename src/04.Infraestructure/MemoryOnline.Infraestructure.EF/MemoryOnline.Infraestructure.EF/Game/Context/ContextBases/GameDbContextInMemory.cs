@@ -1,47 +1,59 @@
-using MemoryOnline.Infraestructure.IRepository.Game;
+using Hispalance.Infraestructure.DB.DBContext;
+using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Stats;
+using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
 {
-    public class GameDbContextInMemory : GameDbContextBase
+    public class GameDbContextInMemory : DBContextInMemory
     {
-        public GameDbContextInMemory(DbContextOptions<GameDbContextInMemory> options, IConfiguration config) : base(options, config)
+        public GameDbContextInMemory(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Match>(entity =>
             {
-                optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
+                entity.HasKey(m => m.Id);
 
-                // 2. Muestra los valores de los parámetros en las consultas SQL (crucial para debug)
-                .EnableSensitiveDataLogging()
+                entity.OwnsMany(m => m.States, state =>
+                {
+                    state.Property(s => s.Id).ValueGeneratedNever();
+                    state.HasKey(s => s.Id);
 
-                // 3. Proporciona excepciones mucho más detalladas si falla la lectura de datos
-                .EnableDetailedErrors();
+                    state.OwnsMany(s => s.Cards, card =>
+                    {
+                        card.HasKey("Id");
+                    });
 
-                optionsBuilder.UseInMemoryDatabase(_connectionString);
+                    state.OwnsMany(s => s.Players, player =>
+                    {
+                        player.HasKey("Id");
+                    });
+                });
+            });
 
-                base.OnConfiguring(optionsBuilder);
-            }
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+
+                entity.HasMany(u => u.Results)
+                      .WithOne()
+                      .HasForeignKey(r => r.UsuarioId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserMatchResult>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.UsuarioId).IsRequired();
+            });
         }
 
-        protected override string GetConnectionString()
-        {
-            try
-            {
-                var database = _config.GetSection("DBSection:Database").Value;
-
-                return database;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Algo falla al recuperar los datos " +
-                    "de la conection string en el dbcontext", ex);
-            }
-        }
     }
 }

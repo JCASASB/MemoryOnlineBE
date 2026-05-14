@@ -5,7 +5,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
 {
     public class DBContextMySql : DBContextMyBase
     {
-        public DBContextMySql(IConfiguration config) : base(config)
+        public DBContextMySql(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
 

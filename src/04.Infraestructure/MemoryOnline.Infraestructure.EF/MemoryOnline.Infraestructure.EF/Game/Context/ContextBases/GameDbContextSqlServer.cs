@@ -1,53 +1,58 @@
-using MemoryOnline.Infraestructure.IRepository.Game;
+using Hispalance.Infraestructure.DB.DBContext;
+using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Stats;
+using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
 {
-    public class GameDbContextSqlServer : GameDbContextBase
+    public class GameDbContextSqlServer : DBContextSqlServer
     {
-        public GameDbContextSqlServer(DbContextOptions<GameDbContextSqlServer> options, IConfiguration config) : base(options, config)
+        public GameDbContextSqlServer(DbContextOptions options, IConfiguration config) : base(options, config)
         {
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Match>(entity =>
             {
-                optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information)
+                entity.ToTable("Matches");
+                entity.HasKey(m => m.Id);
 
-                // 2. Muestra los valores de los parámetros en las consultas SQL (crucial para debug)
-                .EnableSensitiveDataLogging()
+                // CONFIGURACIÓN JSON (Para simular comportamiento NoSQL en SQL Server)
+                entity.OwnsMany(m => m.States, state =>
+                {
+                    state.ToJson(); // Convierte toda la colección States en una columna JSON
 
-                // 3. Proporciona excepciones mucho más detalladas si falla la lectura de datos
-                .EnableDetailedErrors();
+                    state.Property(s => s.Id).ValueGeneratedNever();
 
-                optionsBuilder.UseSqlServer(_connectionString);
+                    state.OwnsMany(s => s.Cards);
+                    state.OwnsMany(s => s.Players);
+                });
+            });
 
-                base.OnConfiguring(optionsBuilder);
-            }
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.ToTable("Usuarios");
+                entity.HasKey(u => u.Id);
+
+                // Definir la relación 1 a muchos
+                entity.HasMany(u => u.Results)         // Un Usuario tiene muchos Results
+                      .WithOne()                       // Cada Result pertenece a un Usuario
+                      .HasForeignKey("UsuarioId")      // EF creará esta Shadow Property en la DB
+                      .OnDelete(DeleteBehavior.Cascade); // Si borras al usuario, se borran sus resultados
+            });
+
+            modelBuilder.Entity<UserMatchResult>(entity =>
+            {
+                entity.ToTable("UsuarioResults");
+                entity.HasKey(r => r.Id); // Asumiendo que UserMatchResult tiene un Id
+                entity.Property(r => r.UsuarioId).IsRequired();
+            });
+
         }
 
-        protected override string GetConnectionString()
-        {
-            try
-            {
-                var server = _config.GetSection("DBSection:Server").Value;
-                var port = _config.GetSection("DBSection:Port").Value;
-                var database = _config.GetSection("DBSection:Database").Value;
-                var user = _config.GetSection("DBSection:User").Value;
-                var pass = _config.GetSection("DBSection:Password").Value;
-                var connectionString = String.Format("Server={0},{1};Database={2};User Id={3};Password={4};TrustServerCertificate=True;",
-                    server, port, database, user, pass);
-
-                return connectionString;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Algo falla al recuperar los datos " +
-                    "de la conection string en el dbcontext", ex);
-            }
-        }
     }
-    }
+}

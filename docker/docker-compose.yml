@@ -1,4 +1,9 @@
 version: '3.8'
+
+include:
+  - mongodb-compose.yml
+
+
 services:
   memoryonline.apis.webapi:
     image: ${DOCKER_REGISTRY-}memoryonlineapiswebapi
@@ -30,18 +35,7 @@ services:
     networks:
       - app-network
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sql_server_db
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=TuPasswordFuerte123!
-    ports:
-      - "1433:1433"
-    volumes:
-      - mssql_data:/var/opt/mssql
-    networks:
-      - app-network
+  
 
   # --- MONITORING STACK ---
 
@@ -101,8 +95,7 @@ services:
     networks:
       - app-network
 
-volumes:
-  mssql_data:
+
 
 networks:
   app-network:
