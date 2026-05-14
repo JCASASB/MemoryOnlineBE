@@ -17,25 +17,11 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Match>(entity =>
+            modelBuilder.Entity<Match>()
+            .OwnsMany(m => m.States, boardState =>
             {
-                entity.HasKey(m => m.Id);
-
-                entity.OwnsMany(m => m.States, state =>
-                {
-                    state.Property(s => s.Id).ValueGeneratedNever();
-                    state.HasKey(s => s.Id);
-
-                    state.OwnsMany(s => s.Cards, card =>
-                    {
-                        card.HasKey("Id");
-                    });
-
-                    state.OwnsMany(s => s.Players, player =>
-                    {
-                        player.HasKey("Id");
-                    });
-                });
+                boardState.OwnsMany(bs => bs.Cards);
+                boardState.OwnsMany(bs => bs.Players);
             });
 
             modelBuilder.Entity<Usuario>(entity =>
