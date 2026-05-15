@@ -1,4 +1,5 @@
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Infraestructure.EF.Game.Context;
 using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,11 +7,11 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
 {
     public class GameRepositoryEF : IGameRepository
     {
-        private readonly IGameDbContext _context;
+        private readonly GameDbContext _context;
 
         public GameRepositoryEF(IGameDbContext context)
         {
-            _context = context;
+            _context = context as GameDbContext;
         }
 
         public async Task AddAsync(Match match)

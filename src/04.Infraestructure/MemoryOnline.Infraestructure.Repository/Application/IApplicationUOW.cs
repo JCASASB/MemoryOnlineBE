@@ -10,7 +10,6 @@ namespace MemoryOnline.Infraestructure.IRepository.Application
 
         Task AddUserAsync(Usuario entityToAdd);
 
-
         Task<IEnumerable<UserMatchResult>> GetUserResultsWithFilterAsync(ISpecification<UserMatchResult> spec);
 
         Task AddUserResultsAsync(UserMatchResult results);
