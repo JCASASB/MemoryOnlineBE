@@ -11,12 +11,12 @@ namespace MemoryOnline.Application.Game.GameAppplication.EventHandlers
     public class MatchFinishedEventHandler : INotificationHandler<DomainEventNotificationAdaptor<MatchFinishedDomainEvent>>
     {
         
-        private readonly IApplicationUOW _appRepository;
+        private readonly IApplicationUOW _appUOW;
         private readonly IGameRepository _gameRepository;
 
-        public MatchFinishedEventHandler(IApplicationUOW appRepository, IGameRepository gameRepository)
+        public MatchFinishedEventHandler(IApplicationUOW appUOW, IGameRepository gameRepository)
         {
-             _appRepository = appRepository;
+             _appUOW = appUOW;
              _gameRepository = gameRepository;
         }
 
@@ -41,7 +41,7 @@ namespace MemoryOnline.Application.Game.GameAppplication.EventHandlers
                     resultsPlayer.Matchs = player.Points;
                     resultsPlayer.UsuarioId = player.Id;
 
-                    await _appRepository.AddUserResultsAsync(resultsPlayer);
+                    await _appUOW.AddUserResultsAsync(resultsPlayer);
                 }
 
             }

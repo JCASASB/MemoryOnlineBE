@@ -11,7 +11,12 @@ namespace Hispalance.Infraestructure.DB.DBContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseInMemoryDatabase(_connectionString);
+            if (!options.IsConfigured)
+            {
+                options.UseInMemoryDatabase(_connectionString)
+                    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+                    .EnableSensitiveDataLogging();
+            }
 
             base.OnConfiguring(options);
         }
