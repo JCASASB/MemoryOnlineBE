@@ -23,7 +23,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             _mediator = mediator;
             _mapper = mapper;
         }
-      
+
         private async Task ResponseGameState(string clientGroupId, List<BoardState> newGame)
         {
             var dtoGameState = _mapper.Map<GameStateDtoOut>(newGame);
@@ -46,6 +46,19 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             string clientGroupId = theMatchId.ToString();
 
             await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
+        }
+
+        public async Task CreateChallenge(GameStateDtoIn updatedGame)
+        {
+            String userId = Context.UserIdentifier ?? "UnknownUser";
+
+            Guid newMatchId = Guid.NewGuid();
+
+            var boardState = _mapper.Map<BoardState>(updatedGame);
+
+            await _mediator.Send(new CreateMatchCommand(boardState, newMatchId));
+
+            await _mediator.Send(new CreateChallengeCommand(newMatchId));
         }
 
         public async Task CreateGame(GameStateDtoIn updatedGame)

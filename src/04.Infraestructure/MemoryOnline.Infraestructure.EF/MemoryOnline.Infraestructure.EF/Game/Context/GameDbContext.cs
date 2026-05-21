@@ -13,8 +13,9 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context
     {
         public DbSet<Match> Matches { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Challenge> Challenges { get; set; }
         public DbSet<UserMatchResult> UsuarioResults { get; set; }
-
+        
         public GameDbContext(DbContextOptions options, IConfiguration config) : base(options, config)
         {
            // Database.EnsureDeleted(); // Agregado para forzar la eliminación de la BD obsoleta

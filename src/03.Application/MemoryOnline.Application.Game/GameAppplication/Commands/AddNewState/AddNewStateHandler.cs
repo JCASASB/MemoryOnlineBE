@@ -28,7 +28,7 @@ namespace MemoryOnline.Application.Game.GameAppplication.Commands.UpdateGameStat
             
             match = _addNewStateUseCase.Execute(match, request.gameState);
 
-            await _gameRepository.UpdateAsync(match);
+            await _gameRepository.UpdateMatchAsync(match);
 
             await ThrowTheNewDomainEvents(_addNewStateUseCase.GetEvents(), cancellationToken);
         }

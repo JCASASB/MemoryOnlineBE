@@ -69,7 +69,7 @@ namespace MemoryOnline.Apis.WebApi.Controllers.AuthController
             var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(ClaimTypes.Role, "Jugador"),
-            new Claim(username, "NameUsuario")
+            new Claim(ClaimTypes.Name, username)
         };
 
             var token = new JwtSecurityToken(

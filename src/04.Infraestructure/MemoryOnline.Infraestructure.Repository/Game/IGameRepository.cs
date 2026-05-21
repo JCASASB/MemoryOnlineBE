@@ -4,11 +4,13 @@ namespace MemoryOnline.Infraestructure.IRepository.Game
 {
     public interface IGameRepository
     {
-        Task<IEnumerable<Match>> GetAllAsync();
+        Task<IEnumerable<Match>> GetAllMatchAsync();
         Task<Match> GetMatchByNameAsync(string name);
         Task<IEnumerable<BoardState>> GetAllBoardStatesAsync(Guid matchId);
-        Task AddAsync(Match match);
+        Task AddMatchAsync(Match match);
         Task UpdateNewStateAsync(Guid matchId, BoardState game);
-        Task UpdateAsync(Match match);
+        Task UpdateMatchAsync(Match match);
+        Task AddChallengeAsync(Challenge challenge);
+
     }
 }

@@ -14,11 +14,19 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
             _context = context as GameDbContext;
         }
 
-        public async Task AddAsync(Match match)
+        public async Task AddMatchAsync(Match match)
         {
             _context.Matches.Add(match);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddChallengeAsync(Challenge challenge)
+        {
+            _context.Challenges.Add(challenge);
+            await _context.SaveChangesAsync();
+        }
+
+        
 
         public async Task<Match> GetMatchByNameAsync(string name)
         {
@@ -28,7 +36,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
             return match;
         }
 
-        public async Task<IEnumerable<Match>> GetAllAsync()
+        public async Task<IEnumerable<Match>> GetAllMatchAsync()
         {
             var matches = await _context.Matches
                                 .Include(m => m.States)
@@ -46,7 +54,7 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
             return match?.States ?? new List<BoardState>();
         }
 
-        public async Task UpdateAsync(Match match)
+        public async Task UpdateMatchAsync(Match match)
         {
             await _context.SaveChangesAsync();
         }

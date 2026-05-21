@@ -21,7 +21,7 @@ namespace MemoryOnline.Application.Game.GameAppplication.Commands.CreateMatch
         public async Task Handle(CreateMatchCommand request, CancellationToken cancellationToken)
         {
             Match match = _createMatchUseCase.Execute(request.initialState, request.matchId);
-            await _matchRepository.AddAsync(match);
+            await _matchRepository.AddMatchAsync(match);
         }
     }
 }
