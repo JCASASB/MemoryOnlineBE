@@ -1,4 +1,5 @@
-﻿using MemoryOnline.Domain.Domain.GameUseCases;
+﻿using MemoryOnline.Domain.Domain.ChallengeUseCases;
+using MemoryOnline.Domain.Domain.GameUseCases;
 using MemoryOnline.Domain.Domain.IGameUseCases;
 using MemoryOnline.Domain.Domain.IMatchUseCases;
 using MemoryOnline.Domain.Domain.MatchUseCases;
@@ -27,7 +28,8 @@ namespace MemoryOnline.Common.IOC
 
             services.AddScoped<ICreateMatchUseCase, CreateMatchUseCase>();
             services.AddScoped<IAddNewStateUseCase, AddNewStateUseCase>();
-            
+            services.AddScoped<ICreateChallengeUseCase, CreateChallengeUseCase>();
+
             return services;
         }
 

@@ -1,7 +1,6 @@
 using MediatR;
 using MemoryOnline.Application.Application.Events;
-using MemoryOnline.Domain.Domain.MatchUseCases;
-using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Game.Events;
 using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Infraestructure.IRepository.Application;
 using MemoryOnline.Infraestructure.IRepository.Game;

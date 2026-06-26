@@ -11,6 +11,8 @@ namespace MemoryOnline.Infraestructure.IRepository.Game
         Task UpdateNewStateAsync(Guid matchId, BoardState game);
         Task UpdateMatchAsync(Match match);
         Task AddChallengeAsync(Challenge challenge);
+        Task<Challenge> GetChallengeAsync(Guid challengeId);
+        Task<Match> GetMatchByIdAsync(Guid matchId);
 
     }
 }

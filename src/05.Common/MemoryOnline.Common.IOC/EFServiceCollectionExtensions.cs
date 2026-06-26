@@ -23,9 +23,6 @@ namespace MemoryOnline.Common.IOC
             return services;
         }
 
-       
-
-
         public static IServiceCollection AddEFUsers(this IServiceCollection services)
         {
             services.AddDbContext<GameDbContext>();
@@ -35,10 +32,6 @@ namespace MemoryOnline.Common.IOC
 
             return services;
         }
-
-
-
-        
         public static void AddGenericDIConfiguration(this IServiceCollection services)
         {
             services.AddScoped(typeof(IGenericRepository<>), typeof(UsersGenericRepositoryEF<>));

@@ -1,3 +1,4 @@
+using MemoryOnline.Domain.Entities.Game;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
@@ -11,10 +12,13 @@ namespace MemoryOnline.Apis.Signalr.Hubs
         {
             string name = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
 
+            String userId = Context.UserIdentifier ?? "UnknownUser";
+
             var payload = new
             {
+                PlayerId = userId,
                 PlayerName = name,
-                Message = "Se ha conectado!!",
+                Message = "Se ha conectado!",
                 SentAtUtc = DateTime.UtcNow,
             };
 
@@ -23,8 +27,12 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             await base.OnConnectedAsync();
         }
 
-        public async Task SendMessage(string playerName, string message)
+        public async Task SendChatMessage(dynamic objectParameter)
         {
+            var playerName = objectParameter.GetProperty("playerName").GetString();
+            var message = objectParameter.GetProperty("message").GetString();
+            var playerId = objectParameter.GetProperty("playerId").GetString();
+
             var cleanMessage = message?.Trim();
             var cleanPlayerName = playerName?.Trim();
 
@@ -40,6 +48,7 @@ namespace MemoryOnline.Apis.Signalr.Hubs
 
             var payload = new
             {
+                PlayerId = playerId,
                 PlayerName = cleanPlayerName,
                 Message = cleanMessage,
                 SentAtUtc = DateTime.UtcNow,
@@ -48,10 +57,8 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             await Clients.All.SendAsync("ChatMessageReceived", payload);
         }
 
-        public Task SendChatMessage(string playerName, string message)
-        {
-            return SendMessage(playerName, message);
-        }
+
+       
 
     }
 }

@@ -54,6 +54,12 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
             return match?.States ?? new List<BoardState>();
         }
 
+        public async Task<Match> GetMatchByIdAsync(Guid matchId)
+        {
+            return await _context.Matches
+                .FirstOrDefaultAsync(m => m.Id == matchId);
+        }
+
         public async Task UpdateMatchAsync(Match match)
         {
             await _context.SaveChangesAsync();
@@ -72,6 +78,12 @@ namespace MemoryOnline.Infraestructure.EF.Game.Repositories
 
             // 3. Guardar
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Challenge> GetChallengeAsync(Guid challengeId)
+        {
+            return await _context.Challenges
+                .FirstOrDefaultAsync(c => c.Id == challengeId);
         }
     }
 }

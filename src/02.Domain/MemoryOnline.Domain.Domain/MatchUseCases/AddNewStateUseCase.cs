@@ -1,7 +1,7 @@
 
 using MemoryOnline.Domain.Domain.IGameUseCases;
-using MemoryOnline.Domain.Domain.MatchUseCases;
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Game.Events;
 
 namespace MemoryOnline.Domain.Domain.GameUseCases
 {

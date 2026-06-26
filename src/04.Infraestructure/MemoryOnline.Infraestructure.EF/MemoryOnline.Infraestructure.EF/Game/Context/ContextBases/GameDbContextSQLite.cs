@@ -1,5 +1,6 @@
 using Hispalance.Infraestructure.DB.Implementations.DBContext;
 using MemoryOnline.Domain.Entities.Game;
+using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,45 @@ namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases
                       .WithOne()                       // Cada Result pertenece a un Usuario
                       .HasForeignKey(r => r.UsuarioId) // FK usando la propiedad real de la entidad
                       .OnDelete(DeleteBehavior.Cascade); // Si borras al usuario, se borran sus resultados
+            });
+
+            modelBuilder.Entity<UserMatchResult>(entity =>
+            {
+                entity.ToTable("UsuarioResults");
+                entity.HasKey(r => r.Id);
+
+                entity.Property(r => r.Id).ValueGeneratedNever();
+                entity.Property(r => r.MatchId).IsRequired();
+                entity.Property(r => r.UsuarioId).IsRequired();
+                entity.Property(r => r.Moves).IsRequired();
+                entity.Property(r => r.Fails).IsRequired();
+                entity.Property(r => r.Matchs).IsRequired();
+                entity.Property(r => r.Winner).IsRequired();
+
+                entity.HasOne<Match>()
+                      .WithMany()
+                      .HasForeignKey(r => r.MatchId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Challenge>(entity =>
+            {
+                entity.ToTable("Challenges");
+                entity.HasKey(c => c.Id);
+
+                entity.Property(c => c.Id).ValueGeneratedNever();
+
+                // Players almacenados como JSON (igual que en Match)
+                entity.OwnsMany(c => c.Players, player =>
+                {
+                    player.ToJson();
+                });
+
+                // FK hacia Matches
+                entity.HasOne(c => c.Match)
+                      .WithMany()
+                      .HasForeignKey("MatchId")
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
 

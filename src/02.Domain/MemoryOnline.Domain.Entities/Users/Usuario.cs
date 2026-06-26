@@ -4,11 +4,10 @@ namespace MemoryOnline.Domain.Entities.Users
 {
     public class Usuario
     {
-        public Guid Id { get; set; }
-        public required string Name { get; set; }
-        public int Age { get; set; }
-        public required string Password { get; set; }
-        public required string ConnectionIdHub { get; set; }
+        public Guid Id { get; private set; }
+        public string Name { get; private set; }
+        public int Age { get; private set; }
+        public string Password { get; private set; }
 
         public required List<UserMatchResult> Results { get; set; } 
 
@@ -18,7 +17,6 @@ namespace MemoryOnline.Domain.Entities.Users
             {
                 Name = string.Empty,
                 Password = string.Empty,
-                ConnectionIdHub = string.Empty,
                 Results = new List<UserMatchResult>()
             };
 
@@ -49,12 +47,6 @@ namespace MemoryOnline.Domain.Entities.Users
             public Builder WithPassword(string password)
             {
                 _usuario.Password = password;
-                return this;
-            }
-
-            public Builder WithConnectionIdHub(string connectionIdHub)
-            {
-                _usuario.ConnectionIdHub = connectionIdHub;
                 return this;
             }
 

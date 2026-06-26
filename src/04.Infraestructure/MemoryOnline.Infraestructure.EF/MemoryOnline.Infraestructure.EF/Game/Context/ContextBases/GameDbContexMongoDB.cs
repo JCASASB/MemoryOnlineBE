@@ -2,10 +2,8 @@ using Hispalance.Infraestructure.DB.DBContext;
 using MemoryOnline.Domain.Entities.Game;
 using MemoryOnline.Domain.Entities.Stats;
 using MemoryOnline.Domain.Entities.Users;
-using MemoryOnline.Infraestructure.IRepository.Game;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context.ContextBases

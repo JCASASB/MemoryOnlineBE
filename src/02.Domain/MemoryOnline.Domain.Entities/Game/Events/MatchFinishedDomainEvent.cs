@@ -1,6 +1,4 @@
-﻿using MemoryOnline.Domain.Entities;
-
-namespace MemoryOnline.Domain.Domain.MatchUseCases
+﻿namespace MemoryOnline.Domain.Entities.Game.Events
 {
     public class MatchFinishedDomainEvent : DomainEvent
     {

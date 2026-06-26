@@ -1,9 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using MemoryOnline.Domain.Entities.Users;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace MemoryOnline.Domain.Entities.Game
 {
@@ -15,7 +13,6 @@ namespace MemoryOnline.Domain.Entities.Game
         [Key]
         public Guid Id { get; set; }
         public List<Player> Players { get; set; }
-
-        public Match match { get; set; }
+        public Match Match { get; set; }
     }
 }

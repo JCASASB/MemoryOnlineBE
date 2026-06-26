@@ -9,6 +9,7 @@ using MemoryOnline.Application.Game.GameAppplication.Queries.GetMatchIdFromName;
 using MemoryOnline.Application.Game.GameAppplication.Commands.UpdateGameState;
 using MemoryOnline.Application.Game.GameAppplication.Commands.CreateMatch;
 using MemoryOnline.Application.Game.GameAppplication.Queries.GetBoardStatesFromVersion;
+using MemoryOnline.Application.Game.GameAppplication.Commands.CreateChallenge;
 
 namespace MemoryOnline.Apis.Signalr.Hubs
 {
@@ -48,17 +49,11 @@ namespace MemoryOnline.Apis.Signalr.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, clientGroupId);
         }
 
-        public async Task CreateChallenge(GameStateDtoIn updatedGame)
+        public async Task CreateChallenge(string matchId, string playerId1, string playerId2)
         {
             String userId = Context.UserIdentifier ?? "UnknownUser";
 
-            Guid newMatchId = Guid.NewGuid();
-
-            var boardState = _mapper.Map<BoardState>(updatedGame);
-
-            await _mediator.Send(new CreateMatchCommand(boardState, newMatchId));
-
-            await _mediator.Send(new CreateChallengeCommand(newMatchId));
+            await _mediator.Send(new CreateChallengeCommand(new Guid(matchId), new Guid(playerId1), new Guid(playerId2)));
         }
 
         public async Task CreateGame(GameStateDtoIn updatedGame)
