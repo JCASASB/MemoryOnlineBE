@@ -1,0 +1,8 @@
+services:
+  memoryonline.apis.signalr:
+    image: ${DOCKER_REGISTRY-}memoryonlineapissignalr
+    build:
+      context: .
+      dockerfile: src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile
+    ports:
+      - "5000:8080"

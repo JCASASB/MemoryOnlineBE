@@ -1,0 +1,102 @@
+version: '3.8'
+
+include:
+  - mongodb-compose.yml
+
+
+services:
+  memoryonline.apis.webapi:
+    image: ${DOCKER_REGISTRY-}memoryonlineapiswebapi
+    build:
+      context: ..
+      dockerfile: src/01.Apis/MemoryOnline.Apis.WebApi/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - sqlserver
+      - otel-collector
+    networks:
+      - app-network
+
+  memoryonline.apis.signalr:
+    image: ${DOCKER_REGISTRY-}memoryonlineapissignalr
+    build:
+      context: ..
+      dockerfile: src/01.Apis/MemoryOnline.Apis.Signalr/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - sqlserver
+      - otel-collector
+    networks:
+      - app-network
+
+  
+
+  # --- MONITORING STACK ---
+
+  # Grafana Tempo (Sustituye a Jaeger para Trazas)
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./tempo.yml:/etc/tempo.yml # Necesitarás un archivo de config básico para Tempo
+    ports:
+      - "3200:3200"   # Tempo UI / API
+      - "4317"        # OTLP gRPC (interno para el collector)
+    networks:
+      - app-network
+
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - loki
+      - tempo
+    networks:
+      - app-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./otel-collector-config.yml:/etc/otel-collector-config.yml:Z # La :Z ayuda con permisos en Podman
+    environment:
+      - GRAFANA_ENDPOINT=${GRAFANA_ENDPOINT}
+      - GRAFANA_CLOUD_TOKEN=${GRAFANA_CLOUD_TOKEN}
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
+      - loki
+    networks:
+      - app-network
+
+
+
+networks:
+  app-network:
+    driver: bridge

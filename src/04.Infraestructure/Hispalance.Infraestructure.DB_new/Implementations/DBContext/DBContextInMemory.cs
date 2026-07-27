@@ -1,0 +1,40 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace Hispalance.Infraestructure.DB.DBContext
+{
+    public class DBContextInMemory : DBContextMyBase
+    {
+        public DBContextInMemory(DbContextOptions options, IConfiguration config) : base(options, config)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            if (!options.IsConfigured)
+            {
+                options.UseInMemoryDatabase(_connectionString)
+                    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+                    .EnableSensitiveDataLogging();
+            }
+
+            base.OnConfiguring(options);
+        }
+
+        protected override string GetConnectionString()
+        {
+            try
+            {
+                var database = _config.GetSection("DBSection:Database").Value;
+
+                return database;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Algo falla al recuperar los datos " +
+                    "de la conection string en el dbcontext", ex);
+            }
+        }
+    }
+
+}
