@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 
 namespace Hispalance.Infraestructure.DB.DBContext
 {
@@ -21,7 +22,12 @@ namespace Hispalance.Infraestructure.DB.DBContext
         {
             try
             {
-                var connectionString = _config.GetSection("DBSection:MongoConnectionString").Value;
+                var connectionString = _config.GetSection("DBSection:MongoConnectionString").Value
+                    ?? throw new Exception("DBSection:MongoConnectionString no está configurada.");
+
+                var mongoUrl = new MongoUrl(connectionString);
+                _database = mongoUrl.DatabaseName
+                    ?? throw new Exception("La MongoConnectionString debe incluir el nombre de la base de datos (ej: mongodb://host:27017/memoryDB).");
 
                 return connectionString;
             }
