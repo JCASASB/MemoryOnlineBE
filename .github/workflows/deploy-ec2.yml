@@ -106,7 +106,28 @@ jobs:
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       # ===========================================
-      # 6. Copiar archivos a EC2
+      # 6. Preparar variables de entorno para el deploy
+      # ===========================================
+      - name: Crear archivo .env para el deploy
+        env:
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGOCONNECTIONSTRING }}
+          DOMAIN: ${{ env.DOMAIN }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          set -euo pipefail
+          : "${EC2_USER:?EC2_USER secret is required}"
+          cat > deploy.env <<EOF
+          CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN}
+          MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
+          DOMAIN=${DOMAIN}
+          EC2_USER=${EC2_USER}
+          EOF
+          echo "🔐 Longitudes: CLOUDFLARE_TOKEN=${#CLOUDFLARE_TOKEN} MONGO=${#MONGO_CONNECTION_STRING}"
+          echo "✅ Archivo deploy.env generado"
+
+      # ===========================================
+      # 7. Copiar archivos a EC2
       # ===========================================
       - name: Copiar archivos a EC2
         env:
@@ -118,29 +139,31 @@ jobs:
           echo "📤 Subiendo archivos a /home/$EC2_USER/ ..."
           scp signalr-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
           scp webapi-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
+          scp deploy.env "$EC2_USER@$EC2_HOST:/home/$EC2_USER/.env"
           # scp otel-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
           scp .github/scripts/deploy.sh "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
           echo "✅ Archivos subidos"
 
       # ===========================================
-      # 7. Ejecutar deploy en EC2
+      # 8. Ejecutar deploy en EC2
       # ===========================================
       - name: Ejecutar deploy
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ env.EC2_HOST }}
-          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-          MONGO_CONNECTION_STRING: ${{ secrets.MONGOCONNECTIONSTRING }}
-          DOMAIN: ${{ env.DOMAIN }}
         run: |
           set -euo pipefail
           : "${EC2_USER:?EC2_USER secret is required}"
-          ssh "$EC2_USER@$EC2_HOST" \
-            "EC2_USER='$EC2_USER' CLOUDFLARE_TOKEN='$CLOUDFLARE_TOKEN' DOMAIN='$DOMAIN' MONGO_CONNECTION_STRING='$MONGO_CONNECTION_STRING' bash -s" <<'ENDSSH'
+          ssh "$EC2_USER@$EC2_HOST" bash -s <<'ENDSSH'
             set -euo pipefail
             cd "/home/$EC2_USER"
+            if [ -f .env ]; then
+              set -a
+              source .env
+              set +a
+              rm -f .env
+            fi
             chmod +x deploy.sh
-            export CLOUDFLARE_TOKEN DOMAIN EC2_USER MONGO_CONNECTION_STRING
             ./deploy.sh
           ENDSSH
 

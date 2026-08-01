@@ -122,6 +122,15 @@ fi
 if [ -n "$CLOUDFLARE_TOKEN" ]; then
     echo "🔧 Configurando túnel de Cloudflare..."
 
+    # Registrar longitud del token para depuración (sin mostrarlo)
+    echo "🔐 Longitud del token recibido: ${#CLOUDFLARE_TOKEN}"
+
+    # Validar que el token tiene longitud mínima razonable
+    if [ "${#CLOUDFLARE_TOKEN}" -lt 10 ]; then
+        echo "❌ CLOUDFLARE_TOKEN parece estar vacío o incompleto."
+        exit 1
+    fi
+
     # Detener servicio existente si está corriendo
     sudo systemctl stop cloudflared 2>/dev/null || true
 
@@ -132,14 +141,16 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
         sudo systemctl daemon-reload
     fi
 
+    # Crear directorio de token antes de instalar (por seguridad/defensiva)
+    sudo mkdir -p /etc/cloudflared
+    printf '%s' "$CLOUDFLARE_TOKEN" | sudo tee /etc/cloudflared/token > /dev/null
+    sudo chmod 600 /etc/cloudflared/token
+
     # Instalar/reinstalar el servicio con el token, forzando la creación de errores amigables si falla
     if ! sudo cloudflared service install "$CLOUDFLARE_TOKEN"; then
         echo "⚠️  Cloudflared install reportó un problema o requirió recarga manual."
     fi
     sudo systemctl daemon-reload
-
-    # Registrar longitud del token para depuración (sin mostrarlo)
-    echo "🔐 Longitud del token recibido: ${#CLOUDFLARE_TOKEN}"
 
     # Parchear el servicio para forzar IPv4 y HTTP/2 (evita fallos con IPv6/QUIC en EC2)
     CLOUDFLARED_SERVICE="/etc/systemd/system/cloudflared.service"
