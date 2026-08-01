@@ -11,9 +11,11 @@ CLOUDFLARE_TOKEN="${CLOUDFLARE_TOKEN}"
 EC2_USER="${EC2_USER}"
 BASE_DOMAIN="${DOMAIN:-hispalance.com}"
 MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:-}"
+MONGO_SSM_PARAMETER_NAME="${MONGO_SSM_PARAMETER_NAME:-/backend/MongoConnectionString}"
 
+# Si no se proporciona MongoDB por variable de entorno, se intenta leer desde AWS Systems Manager Parameter Store
 if [ -z "$MONGO_CONNECTION_STRING" ]; then
-    echo "⚠️  MONGO_CONNECTION_STRING no proporcionada. Se usará el valor de appsettings.json."
+    echo "☁️  MONGO_CONNECTION_STRING no proporcionada. Se intentará leer desde AWS SSM: $MONGO_SSM_PARAMETER_NAME"
 fi
 
 # Configuración de servicios
@@ -72,16 +74,44 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # ===========================================
-# 3. Instalar herramientas de diagnóstico . instala el sqlite, deprecated para prod
+# 3. Instalar AWS CLI si no existe (necesario para leer SSM Parameter Store)
 # ===========================================
-#if ! command -v sqlite3 &> /dev/null; then
-#    if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-#        sudo apt-get install -y sqlite3
-#    elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-#        sudo dnf install -y sqlite
-#    fi
-#    echo "✅ sqlite3 instalado"
-#fi
+if ! command -v aws &> /dev/null; then
+    echo "☁️  Instalando AWS CLI v2..."
+    case "$OS" in
+        ubuntu|debian)
+            sudo apt-get update -y
+            sudo apt-get install -y curl unzip
+            ;;
+        amzn|amazonlinux|fedora|rhel|centos)
+            sudo yum update -y
+            sudo yum install -y curl unzip
+            ;;
+    esac
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o awscliv2.zip
+    unzip -q awscliv2.zip
+    sudo ./aws/install --update
+    rm -rf aws awscliv2.zip
+    echo "✅ AWS CLI instalado"
+fi
+
+# Si no se proporcionó MongoDB por variable de entorno, leer desde AWS SSM Parameter Store
+if [ -z "$MONGO_CONNECTION_STRING" ]; then
+    echo "☁️  Leyendo MONGO_CONNECTION_STRING desde AWS SSM Parameter Store..."
+    MONGO_CONNECTION_STRING=$(aws ssm get-parameter \
+        --name "$MONGO_SSM_PARAMETER_NAME" \
+        --with-decryption \
+        --query 'Parameter.Value' \
+        --output text 2>/dev/null) || true
+
+    if [ -z "$MONGO_CONNECTION_STRING" ]; then
+        echo "❌ No se pudo leer MONGO_CONNECTION_STRING desde SSM ($MONGO_SSM_PARAMETER_NAME)."
+        echo "   Verifica que la EC2 tenga rol de IAM con permiso ssm:GetParameter y que el parámetro exista."
+        exit 1
+    fi
+
+    echo "✅ MONGO_CONNECTION_STRING leída correctamente desde SSM (${#MONGO_CONNECTION_STRING} caracteres)"
+fi
 
 # ===========================================
 # 4. Instalar y configurar Cloudflare Tunnel
