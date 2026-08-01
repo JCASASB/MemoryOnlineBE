@@ -3,7 +3,7 @@
 Backend para el juego Memory Online construido con .NET 9, SignalR y desplegado en AWS EC2 con Cloudflare Tunnel.
 
 ## 🏗️ Arquitectura
-
+ 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        Internet                              │
