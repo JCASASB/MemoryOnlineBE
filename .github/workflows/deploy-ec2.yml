@@ -114,6 +114,7 @@ jobs:
           EC2_HOST: ${{ env.EC2_HOST }}
         run: |
           set -euo pipefail
+          : "${EC2_USER:?EC2_USER secret is required}"
           echo "📤 Subiendo archivos a /home/$EC2_USER/ ..."
           scp signalr-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
           scp webapi-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
@@ -133,14 +134,13 @@ jobs:
           DOMAIN: ${{ env.DOMAIN }}
         run: |
           set -euo pipefail
-          ssh "$EC2_USER@$EC2_HOST" bash -s <<'ENDSSH'
+          : "${EC2_USER:?EC2_USER secret is required}"
+          ssh "$EC2_USER@$EC2_HOST" \
+            "EC2_USER='$EC2_USER' CLOUDFLARE_TOKEN='$CLOUDFLARE_TOKEN' DOMAIN='$DOMAIN' MONGO_CONNECTION_STRING='$MONGO_CONNECTION_STRING' bash -s" <<'ENDSSH'
             set -euo pipefail
             cd "/home/$EC2_USER"
             chmod +x deploy.sh
-            export CLOUDFLARE_TOKEN="$CLOUDFLARE_TOKEN"
-            export DOMAIN="$DOMAIN"
-            export EC2_USER="$EC2_USER"
-            export MONGO_CONNECTION_STRING="$MONGO_CONNECTION_STRING"
+            export CLOUDFLARE_TOKEN DOMAIN EC2_USER MONGO_CONNECTION_STRING
             ./deploy.sh
           ENDSSH
 
