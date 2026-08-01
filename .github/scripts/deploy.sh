@@ -85,18 +85,27 @@ fi
 # ===========================================
 echo "☁️  Configurando Cloudflare Tunnel..."
 
+# Detectar arquitectura de la instancia (t4g.nano es ARM64)
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    CLOUDFLARED_ARCH="arm64"
+else
+    CLOUDFLARED_ARCH="amd64"
+fi
+echo "🔧 Arquitectura detectada: $ARCH → cloudflared-linux-$CLOUDFLARED_ARCH"
+
 # Verificar si cloudflared ya está instalado
 if ! command -v cloudflared &> /dev/null; then
     echo "📥 Instalando cloudflared..."
 
     if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
         # Para Ubuntu/Debian
-        curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+        curl -L "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${CLOUDFLARED_ARCH}.deb" -o cloudflared.deb
         sudo dpkg -i cloudflared.deb
         rm cloudflared.deb
     elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
         # Para Amazon Linux
-        curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.rpm -o cloudflared.rpm
+        curl -L "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${CLOUDFLARED_ARCH}.rpm" -o cloudflared.rpm
         sudo yum install -y cloudflared.rpm
         rm cloudflared.rpm
     fi
@@ -126,13 +135,19 @@ if [ -n "$CLOUDFLARE_TOKEN" ]; then
     fi
     sudo systemctl daemon-reload
 
+    # Registrar longitud del token para depuración (sin mostrarlo)
+    echo "🔐 Longitud del token recibido: ${#CLOUDFLARE_TOKEN}"
+
     # Parchear el servicio para forzar IPv4 y HTTP/2 (evita fallos con IPv6/QUIC en EC2)
     CLOUDFLARED_SERVICE="/etc/systemd/system/cloudflared.service"
     if [ -f "$CLOUDFLARED_SERVICE" ]; then
         sudo sed -i 's|--no-autoupdate tunnel run|--no-autoupdate --edge-ip-version 4 --protocol http2 tunnel run|g' "$CLOUDFLARED_SERVICE"
-        # Añadir TimeoutStartSec solo si no existe ya
+        # Añadir timeout y pausa entre reintentos solo si no existen ya
         if ! sudo grep -q "TimeoutStartSec" "$CLOUDFLARED_SERVICE"; then
             sudo sed -i '/\[Service\]/a TimeoutStartSec=90' "$CLOUDFLARED_SERVICE"
+        fi
+        if ! sudo grep -q "RestartSec" "$CLOUDFLARED_SERVICE"; then
+            sudo sed -i '/\[Service\]/a RestartSec=10' "$CLOUDFLARED_SERVICE"
         fi
         sudo systemctl daemon-reload
         echo "✅ Servicio cloudflared parcheado con IPv4 + HTTP/2"
