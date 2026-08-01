@@ -117,12 +117,12 @@ jobs:
         run: |
           set -euo pipefail
           : "${EC2_USER:?EC2_USER secret is required}"
-          cat > deploy.env <<EOF
-          CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN}
-          MONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}
-          DOMAIN=${DOMAIN}
-          EC2_USER=${EC2_USER}
-          EOF
+          {
+            printf 'CLOUDFLARE_TOKEN=%s\n' "$CLOUDFLARE_TOKEN"
+            printf 'MONGO_CONNECTION_STRING=%s\n' "$MONGO_CONNECTION_STRING"
+            printf 'DOMAIN=%s\n' "$DOMAIN"
+            printf 'EC2_USER=%s\n' "$EC2_USER"
+          } > deploy.env
           echo "🔐 Longitudes: CLOUDFLARE_TOKEN=${#CLOUDFLARE_TOKEN} MONGO=${#MONGO_CONNECTION_STRING}"
           echo "✅ Archivo deploy.env generado"
 
