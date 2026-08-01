@@ -56,13 +56,16 @@ echo "🖥️  SO Detectado: $OS"
 # ===========================================
 if ! command -v docker &> /dev/null; then
     echo "🐳 Instalando Docker..."
-    if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-        sudo apt-get update -y
-        sudo apt-get install -y docker.io
-    elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-        sudo yum update -y
-        sudo yum install -y docker
-    fi
+    case "$OS" in
+        ubuntu|debian)
+            sudo apt-get update -y
+            sudo apt-get install -y docker.io
+            ;;
+        amzn|amazonlinux|fedora|rhel|centos)
+            sudo yum update -y
+            sudo yum install -y docker
+            ;;
+    esac
     sudo systemctl start docker
     sudo systemctl enable docker
     sudo usermod -aG docker $USER
@@ -234,12 +237,12 @@ if [ -z "$MONGO_CONNECTION_STRING" ]; then
     echo "⚠️  MONGO_CONNECTION_STRING no está definida. Se usará el valor de appsettings.json."
 fi
 
-# Limpiar posibles comillas que se hayan colado al pasar la variable desde GitHub Actions
-MONGO_CONNECTION_STRING="$(echo "$MONGO_CONNECTION_STRING" | sed 's/^["'\"'\"']*//;s/["'\"'\"']*$//')"
+# Limpiar posibles comillas dobles que se hayan colado al pasar la variable desde GitHub Actions
+MONGO_CONNECTION_STRING=$(printf '%s' "$MONGO_CONNECTION_STRING" | tr -d '"')
 
-# Comprobar que el valor parseado no tenga comillas
-if [[ "$MONGO_CONNECTION_STRING" == \"*\" ]]; then
-    echo "❌ MONGO_CONNECTION_STRING contiene comillas. Valor actual: $MONGO_CONNECTION_STRING"
+# Comprobar que el valor parseado tenga contenido sensato
+if [ -n "$MONGO_CONNECTION_STRING" ] && ! printf '%s' "$MONGO_CONNECTION_STRING" | grep -qE '^mongodb(\+srv)?://'; then
+    echo "❌ MONGO_CONNECTION_STRING no parece una URL de MongoDB válida. Valor actual: $MONGO_CONNECTION_STRING"
     exit 1
 fi
 
