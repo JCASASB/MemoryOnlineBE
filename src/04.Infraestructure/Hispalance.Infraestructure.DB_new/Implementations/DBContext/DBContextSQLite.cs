@@ -22,6 +22,19 @@ namespace Hispalance.Infraestructure.DB.Implementations.DBContext
         protected override string GetConnectionString()
         {
             try
+            {
+                var connectionString = _config.GetSection("DBSection:SqLiteConnectionString").Value;
+                return connectionString;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Algo falla al recuperar los datos " +
+                    "de la conection string en el dbcontext", ex);
+            }
+        } 
+        protected  string GetConnectionString_deprecated()
+        {
+            try
             {   
                 var database = _config.GetSection("DBSection:Database").Value;
                 var server = _config.GetSection("DBSection:Server").Value;

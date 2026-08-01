@@ -17,8 +17,21 @@ namespace Hispalance.Infraestructure.DB.DBContext
 
             base.OnConfiguring(options);
         }
-
         protected override string GetConnectionString()
+        {
+            try
+            {
+                var connectionString = _config.GetSection("DBSection:MongoConnectionString").Value;
+
+                return connectionString;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Algo falla al recuperar los datos " +
+                    "de la conection string en el dbcontext", ex);
+            }
+        }
+        protected string GetConnectionString_deprecated()
         {
             try
             {
@@ -27,7 +40,7 @@ namespace Hispalance.Infraestructure.DB.DBContext
                 var database = _config.GetSection("DBSection:Database").Value;
                 var user = _config.GetSection("DBSection:User").Value;
                 var pass = _config.GetSection("DBSection:Password").Value;
-
+               
                 var connectionString = $"mongodb://{user}:{pass}@{server}:{port}";
 
                 _database = database;

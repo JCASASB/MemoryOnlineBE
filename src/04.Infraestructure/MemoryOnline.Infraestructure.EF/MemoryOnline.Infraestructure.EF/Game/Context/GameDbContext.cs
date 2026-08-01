@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace MemoryOnline.Infraestructure.EF.Game.Context
 {
-    public class GameDbContext : GameDbContextSQLite, IGameDbContext
+    public class GameDbContext : GameDbContexMongoDB, IGameDbContext
     {
         public DbSet<Match> Matches { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }

@@ -10,6 +10,11 @@ set -e
 CLOUDFLARE_TOKEN="${CLOUDFLARE_TOKEN}"
 EC2_USER="${EC2_USER}"
 BASE_DOMAIN="${DOMAIN:-hispalance.com}"
+MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:-}"
+
+if [ -z "$MONGO_CONNECTION_STRING" ]; then
+    echo "⚠️  MONGO_CONNECTION_STRING no proporcionada. Se usará el valor de appsettings.json."
+fi
 
 # Configuración de servicios
 SIGNALR_CONTAINER="memoryonline-signalr"
@@ -21,6 +26,9 @@ WEBAPI_CONTAINER="memoryonline-webapi"
 WEBAPI_IMAGE="memoryonline-webapi"
 WEBAPI_PORT=5001
 WEBAPI_SUBDOMAIN="api.${BASE_DOMAIN}"
+
+# Variable de entorno para MongoDB (proviene del GitHub Secret)
+MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING}"
 
 # Configuración de Monitoring (deshabilitado)
 # OTEL_CONTAINER="otel-collector"
@@ -61,17 +69,16 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # ===========================================
-# 3. Instalar herramientas de diagnóstico
+# 3. Instalar herramientas de diagnóstico . instala el sqlite, deprecated para prod
 # ===========================================
-if ! command -v sqlite3 &> /dev/null; then
-    echo "🔧 Instalando sqlite3..."
-    if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-        sudo apt-get install -y sqlite3
-    elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
-        sudo dnf install -y sqlite
-    fi
-    echo "✅ sqlite3 instalado"
-fi
+#if ! command -v sqlite3 &> /dev/null; then
+#    if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+#        sudo apt-get install -y sqlite3
+#    elif [ "$OS" = "amzn" ] || [ "$OS" = "amazonlinux" ]; then
+#        sudo dnf install -y sqlite
+#    fi
+#    echo "✅ sqlite3 instalado"
+#fi
 
 # ===========================================
 # 4. Instalar y configurar Cloudflare Tunnel
@@ -206,7 +213,13 @@ sudo docker network create app-network 2>/dev/null || true
 # ===========================================
 # 6. Deploy de ambos servicios (SignalR y WebApi)
 # ===========================================
-ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080"
+MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:-}"
+
+if [ -z "$MONGO_CONNECTION_STRING" ]; then
+    echo "⚠️  MONGO_CONNECTION_STRING no está definida. Se usará el valor de appsettings.json."
+fi
+
+ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080 -e DBSection__MongoConnectionString=\"$MONGO_CONNECTION_STRING\""
 
 # Crear directorio de datos compartido si no existe
 mkdir -p /home/$EC2_USER/data
