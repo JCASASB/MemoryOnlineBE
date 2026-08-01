@@ -32,6 +32,7 @@ jobs:
       # ===========================================
       - name: Publish SignalR
         run: |
+          set -euo pipefail
           dotnet publish src/01.Apis/MemoryOnline.Apis.Signalr/MemoryOnline.Apis.Signalr.csproj \
             -c Release \
             -f net10.0 \
@@ -39,6 +40,7 @@ jobs:
 
       - name: Publish WebApi
         run: |
+          set -euo pipefail
           dotnet publish src/01.Apis/MemoryOnline.Apis.WebApi/MemoryOnline.Apis.WebApi.csproj \
             -c Release \
             -f net10.0 \
@@ -94,13 +96,14 @@ jobs:
       # ===========================================
       - name: Configurar SSH
         env:
-          EC2_USER: ${{ secrets.EC2_USER }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ env.EC2_HOST }}
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ env.EC2_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       # ===========================================
       # 6. Copiar archivos a EC2
@@ -108,12 +111,14 @@ jobs:
       - name: Copiar archivos a EC2
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ env.EC2_HOST }}
         run: |
+          set -euo pipefail
           echo "📤 Subiendo archivos a /home/$EC2_USER/ ..."
-          scp signalr-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
-          scp webapi-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
-          # scp otel-image.tar.gz ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
-          scp .github/scripts/deploy.sh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/
+          scp signalr-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
+          scp webapi-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
+          # scp otel-image.tar.gz "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
+          scp .github/scripts/deploy.sh "$EC2_USER@$EC2_HOST:/home/$EC2_USER/"
           echo "✅ Archivos subidos"
 
       # ===========================================
@@ -122,16 +127,20 @@ jobs:
       - name: Ejecutar deploy
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ env.EC2_HOST }}
           CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
           MONGO_CONNECTION_STRING: ${{ secrets.MONGOCONNECTIONSTRING }}
+          DOMAIN: ${{ env.DOMAIN }}
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
-            cd /home/${{ secrets.EC2_USER }}
+          set -euo pipefail
+          ssh "$EC2_USER@$EC2_HOST" bash -s <<'ENDSSH'
+            set -euo pipefail
+            cd "/home/$EC2_USER"
             chmod +x deploy.sh
-            export CLOUDFLARE_TOKEN="${{ secrets.CLOUDFLARE_TOKEN }}"
-            export DOMAIN="${{ env.DOMAIN }}"
-            export EC2_USER="${{ secrets.EC2_USER }}"
-            export MONGO_CONNECTION_STRING="${{ secrets.MONGOCONNECTIONSTRING }}"
+            export CLOUDFLARE_TOKEN="$CLOUDFLARE_TOKEN"
+            export DOMAIN="$DOMAIN"
+            export EC2_USER="$EC2_USER"
+            export MONGO_CONNECTION_STRING="$MONGO_CONNECTION_STRING"
             ./deploy.sh
           ENDSSH
 
@@ -141,6 +150,8 @@ jobs:
       - name: Verificar deploy
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ env.EC2_HOST }}
         run: |
+          set -euo pipefail
           echo "🔍 Verificando servicios..."
-          ssh ${{ secrets.EC2_USER }}@${{ env.EC2_HOST }} "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+          ssh "$EC2_USER@$EC2_HOST" "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
