@@ -219,15 +219,25 @@ if [ -z "$MONGO_CONNECTION_STRING" ]; then
     echo "⚠️  MONGO_CONNECTION_STRING no está definida. Se usará el valor de appsettings.json."
 fi
 
-ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080 -e DBSection__MongoConnectionString=\"$MONGO_CONNECTION_STRING\""
+# Limpiar posibles comillas que se hayan colado al pasar la variable desde GitHub Actions
+MONGO_CONNECTION_STRING="$(echo "$MONGO_CONNECTION_STRING" | sed 's/^["'\"'\"']*//;s/["'\"'\"']*$//')"
+
+# Comprobar que el valor parseado no tenga comillas
+if [[ "$MONGO_CONNECTION_STRING" == \"*\" ]]; then
+    echo "❌ MONGO_CONNECTION_STRING contiene comillas. Valor actual: $MONGO_CONNECTION_STRING"
+    exit 1
+fi
+
+ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080"
+MONGO_ENV_VAR="DBSection__MongoConnectionString=$MONGO_CONNECTION_STRING"
 
 # Crear directorio de datos compartido si no existe
 mkdir -p /home/$EC2_USER/data
 
 VOLUME_MOUNT="-v /home/$EC2_USER/data:/app/data"
 
-deploy_container "$SIGNALR_CONTAINER" "$SIGNALR_IMAGE" "$SIGNALR_PORT" "signalr-image.tar.gz" "$ENV_API" "-p $SIGNALR_PORT:8080 --network app-network $VOLUME_MOUNT"
-deploy_container "$WEBAPI_CONTAINER" "$WEBAPI_IMAGE" "$WEBAPI_PORT" "webapi-image.tar.gz" "$ENV_API" "-p $WEBAPI_PORT:8080 --network app-network $VOLUME_MOUNT"
+deploy_container "$SIGNALR_CONTAINER" "$SIGNALR_IMAGE" "$SIGNALR_PORT" "signalr-image.tar.gz" "$ENV_API" "-p $SIGNALR_PORT:8080 --network app-network $VOLUME_MOUNT -e $MONGO_ENV_VAR"
+deploy_container "$WEBAPI_CONTAINER" "$WEBAPI_IMAGE" "$WEBAPI_PORT" "webapi-image.tar.gz" "$ENV_API" "-p $WEBAPI_PORT:8080 --network app-network $VOLUME_MOUNT -e $MONGO_ENV_VAR"
 
 # ===========================================
 # 7. Limpieza
