@@ -154,15 +154,18 @@ jobs:
         run: |
           set -euo pipefail
           : "${EC2_USER:?EC2_USER secret is required}"
-          ssh "$EC2_USER@$EC2_HOST" bash -s <<'ENDSSH'
+          ssh "$EC2_USER@$EC2_HOST" bash -s "$EC2_USER" <<'ENDSSH'
             set -euo pipefail
-            cd "/home/$EC2_USER"
-            if [ -f .env ]; then
+            REMOTE_USER="$1"
+            ENV_FILE="/home/$REMOTE_USER/.env"
+            if [ -f "$ENV_FILE" ]; then
               set -a
-              source .env
+              source "$ENV_FILE"
               set +a
-              rm -f .env
+              rm -f "$ENV_FILE"
             fi
+            : "${EC2_USER:?EC2_USER secret is required in .env}"
+            cd "/home/$EC2_USER"
             chmod +x deploy.sh
             ./deploy.sh
           ENDSSH
