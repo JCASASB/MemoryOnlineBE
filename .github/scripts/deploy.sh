@@ -11,7 +11,7 @@ CLOUDFLARE_TOKEN="${CLOUDFLARE_TOKEN}"
 EC2_USER="${EC2_USER}"
 BASE_DOMAIN="${DOMAIN:-hispalance.com}"
 MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:-}"
-MONGO_SSM_PARAMETER_NAME="${MONGO_SSM_PARAMETER_NAME:-/backend/MongoConnectionString}"
+MONGO_SSM_PARAMETER_NAME="${MONGO_SSM_PARAMETER_NAME:-/prod/backend/MongoConnectionString}"
 
 # Si no se proporciona MongoDB por variable de entorno, se intenta leer desde AWS Systems Manager Parameter Store
 if [ -z "$MONGO_CONNECTION_STRING" ]; then
@@ -93,24 +93,6 @@ if ! command -v aws &> /dev/null; then
     sudo ./aws/install --update
     rm -rf aws awscliv2.zip
     echo "✅ AWS CLI instalado"
-fi
-
-# Si no se proporcionó MongoDB por variable de entorno, leer desde AWS SSM Parameter Store
-if [ -z "$MONGO_CONNECTION_STRING" ]; then
-    echo "☁️  Leyendo MONGO_CONNECTION_STRING desde AWS SSM Parameter Store..."
-    MONGO_CONNECTION_STRING=$(aws ssm get-parameter \
-        --name "$MONGO_SSM_PARAMETER_NAME" \
-        --with-decryption \
-        --query 'Parameter.Value' \
-        --output text 2>/dev/null) || true
-
-    if [ -z "$MONGO_CONNECTION_STRING" ]; then
-        echo "❌ No se pudo leer MONGO_CONNECTION_STRING desde SSM ($MONGO_SSM_PARAMETER_NAME)."
-        echo "   Verifica que la EC2 tenga rol de IAM con permiso ssm:GetParameter y que el parámetro exista."
-        exit 1
-    fi
-
-    echo "✅ MONGO_CONNECTION_STRING leída correctamente desde SSM (${#MONGO_CONNECTION_STRING} caracteres)"
 fi
 
 # ===========================================
@@ -272,20 +254,31 @@ sudo docker network create app-network 2>/dev/null || true
 # ===========================================
 # 6. Deploy de ambos servicios (SignalR y WebApi)
 # ===========================================
-MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:-}"
+
+# Leer siempre MONGO_CONNECTION_STRING desde AWS SSM Parameter Store en tiempo de ejecución
+# Esto evita escribir el secreto en archivos del runner o la EC2
+MONGO_CONNECTION_STRING=$(aws ssm get-parameter \
+    --name "$MONGO_SSM_PARAMETER_NAME" \
+    --with-decryption \
+    --query 'Parameter.Value' \
+    --output text 2>/dev/null) || true
 
 if [ -z "$MONGO_CONNECTION_STRING" ]; then
-    echo "⚠️  MONGO_CONNECTION_STRING no está definida. Se usará el valor de appsettings.json."
-fi
-
-# Limpiar posibles comillas dobles que se hayan colado al pasar la variable desde GitHub Actions
-MONGO_CONNECTION_STRING=$(printf '%s' "$MONGO_CONNECTION_STRING" | tr -d '"')
-
-# Comprobar que el valor parseado tenga contenido sensato
-if [ -n "$MONGO_CONNECTION_STRING" ] && ! printf '%s' "$MONGO_CONNECTION_STRING" | grep -qE '^mongodb(\+srv)?://'; then
-    echo "❌ MONGO_CONNECTION_STRING no parece una URL de MongoDB válida. Valor actual: $MONGO_CONNECTION_STRING"
+    echo "❌ No se pudo leer MONGO_CONNECTION_STRING desde SSM ($MONGO_SSM_PARAMETER_NAME)."
+    echo "   Verifica que la EC2 tenga rol de IAM con permiso ssm:GetParameter y que el parámetro exista."
     exit 1
 fi
+
+# Quitar posibles comillas dobles que puedan venir en el parámetro
+MONGO_CONNECTION_STRING=$(printf '%s' "$MONGO_CONNECTION_STRING" | tr -d '"')
+
+# Comprobar que el valor sea una URL de MongoDB válida
+if ! printf '%s' "$MONGO_CONNECTION_STRING" | grep -qE '^mongodb(\+srv)?://'; then
+    echo "❌ MONGO_CONNECTION_STRING no parece una URL de MongoDB válida."
+    exit 1
+fi
+
+echo "✅ MONGO_CONNECTION_STRING leída desde SSM (${#MONGO_CONNECTION_STRING} caracteres)"
 
 ENV_API="-e ASPNETCORE_ENVIRONMENT=Production -e ASPNETCORE_URLS=http://+:8080"
 MONGO_ENV_VAR="DBSection__MongoConnectionString=$MONGO_CONNECTION_STRING"
