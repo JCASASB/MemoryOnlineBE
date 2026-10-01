@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "mi_depuracion_local": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5063"
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json"
+}

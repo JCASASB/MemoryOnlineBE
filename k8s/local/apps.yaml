@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: memoryonline-config
+  namespace: memoryonline
+data:
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_URLS: http://+:8080
+  DBSection__Provider: MongoDB
+  DBSection__MongoConnectionString: mongodb://admin:CHANGE_ME@mongodb-0.mongodb:27017/memorydb?authSource=admin&replicaSet=rs0
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memoryonline-api
+  namespace: memoryonline
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: memoryonline-api }
+  template:
+    metadata:
+      labels: { app: memoryonline-api }
+    spec:
+      containers:
+        - name: api
+          image: localhost/memoryonline-api:local
+          imagePullPolicy: Never
+          ports: [{ containerPort: 8080 }]
+          envFrom: [{ configMapRef: { name: memoryonline-config } }]
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata: { name: memoryonline-api, namespace: memoryonline }
+spec:
+  selector: { app: memoryonline-api }
+  ports: [{ port: 8080, targetPort: 8080 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memoryonline-signalr
+  namespace: memoryonline
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: memoryonline-signalr }
+  template:
+    metadata:
+      labels: { app: memoryonline-signalr }
+    spec:
+      containers:
+        - name: signalr
+          image: localhost/memoryonline-signalr:local
+          imagePullPolicy: Never
+          ports: [{ containerPort: 8080 }]
+          envFrom: [{ configMapRef: { name: memoryonline-config } }]
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata: { name: memoryonline-signalr, namespace: memoryonline }
+spec:
+  selector: { app: memoryonline-signalr }
+  ports: [{ port: 8080, targetPort: 8080 }]

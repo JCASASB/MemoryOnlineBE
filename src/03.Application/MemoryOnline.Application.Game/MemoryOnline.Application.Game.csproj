@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Domain\MemoryOnline.Domain.Domain.csproj" />
+    <ProjectReference Include="..\..\02.Domain\MemoryOnline.Domain.Entities\MemoryOnline.Domain.Entities.csproj" />
+    <ProjectReference Include="..\..\04.Infraestructure\MemoryOnline.Infraestructure.Repository\MemoryOnline.Infraestructure.IRepository.csproj" />
+    <ProjectReference Include="..\MemoryOnline.Application.Events\MemoryOnline.Application.Events.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="GameAppplication\Commands\MatchFinished\" />
+  </ItemGroup>
+
+</Project>
